@@ -25,7 +25,7 @@ import {
   sessionTypeLabel,
   barColor,
 } from '@/utils/format'
-import type { BankrollPoint, BarPoint, Period } from '@/types/stats'
+import type { BankrollPoint, BarPoint } from '@/types/stats'
 
 const { sortedSessions } = useSessions()
 const { selectedPeriod, chartData, currentBankroll } = useBankroll(sortedSessions)
@@ -39,7 +39,7 @@ const {
 } = useStats(sortedSessions, currentBankroll)
 
 const bankrollChartConfig = {
-  bankroll: { label: 'Bankroll', color: '#0f766e' },
+  bankroll: { label: 'Bankroll', color: '#0284c7' },
 } satisfies ChartConfig
 
 const barChartConfig = {
@@ -363,6 +363,12 @@ const barChartConfig = {
                 :num-ticks="4"
               />
               <ChartTooltip />
+              <ChartCrosshair
+                :template="componentToString(barChartConfig, ChartTooltipContent, {
+                  labelFormatter: (d: number | Date) => barData[Number(d)]?.category ?? '',
+                  indicator: 'dot',
+                })"
+              />
             </VisXYContainer>
           </ChartContainer>
         </CardContent>

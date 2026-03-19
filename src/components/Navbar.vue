@@ -20,7 +20,7 @@ import {
     <div class="grow" />
 
     <!-- Add session -->
-    <Button variant="default" size="sm" class="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
+    <Button variant="default" size="sm" class="gap-1.5">
       <PlusCircle class="w-4 h-4" />
       Nouvelle session
     </Button>

@@ -42,7 +42,7 @@ const sessionsOpen = ref(true)
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
             <a href="#">
-              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
+              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sky-600 text-white">
                 <TrendingUp class="size-4" />
               </div>
               <span class="font-bold text-stone-900">Bankroll</span>
@@ -52,10 +52,11 @@ const sessionsOpen = ref(true)
       </SidebarMenu>
     </SidebarHeader>
 
-    <SidebarContent class="pt-4">
+    <SidebarContent>
       <SidebarGroup>
         <SidebarGroupContent>
-          <SidebarMenu class="space-y-2">
+          <SidebarMenu>
+
             <!-- Dashboard -->
             <SidebarMenuItem>
               <SidebarMenuButton tooltip="Dashboard" is-active>
