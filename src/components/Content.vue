@@ -4,7 +4,7 @@ import Dashboard from './Dashboard.vue';
 </script>
 
 <template>
-    <div class="p-8 overflow-auto">
+    <div class="overflow-auto">
         <Dashboard></Dashboard>
     </div>
 </template>

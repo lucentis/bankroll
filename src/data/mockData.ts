@@ -1,24 +1,8 @@
-export type SessionType = 'CASH_GAME' | 'MTT' | 'SNG' | 'SPIN'
-export type Venue = 'LIVE' | 'ONLINE'
-
-export interface MockSession {
-  id: string
-  date: Date
-  type: SessionType
-  venue: Venue
-  totalBuyIn: number
-  cashOut: number
-  duration: number // minutes
-  location: string
-  stakes?: string // cash game only, e.g. "1/2"
-  players?: number // tournament only
-  position?: number // tournament only
-  notes?: string
-}
+import type { Session } from '@/types/session'
 
 export const INITIAL_BANKROLL = 1000
 
-export const mockSessions: MockSession[] = [
+export const mockSessions: Session[] = [
   {
     id: '1',
     date: new Date('2026-01-05'),
