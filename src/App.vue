@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import Content from './components/Content.vue';
-import Navbar from './components/Navbar.vue';
-import Sidebar from './components/sidebar/Sidebar.vue';
-import SidebarItem from './components/sidebar/SidebarItem.vue';
-
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import AppSidebar from '@/components/AppSidebar.vue'
+import Navbar from '@/components/Navbar.vue'
+import Content from '@/components/Content.vue'
 </script>
 
 <template>
-    <Navbar></Navbar>
-    <main class="grow flex overflow-hidden">
-        <Sidebar>
-            <SidebarItem>
-                Dashboard
-            </SidebarItem>
-
-            <SidebarItem>
-                Games
-            </SidebarItem>
-        </Sidebar>
-        <Content class="grow">ok</Content>
-    </main>
+    <SidebarProvider>
+        <AppSidebar />
+        <div class="flex flex-col flex-1 min-w-0">
+            <Navbar>
+                <template #leading>
+                    <SidebarTrigger class="-ml-1" />
+                </template>
+            </Navbar>
+            <Content class="flex-1 overflow-auto" />
+        </div>
+    </SidebarProvider>
 </template>
