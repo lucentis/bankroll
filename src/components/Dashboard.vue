@@ -362,6 +362,7 @@ const barChartConfig = {
                 :grid-line="true"
                 :num-ticks="4"
               />
+              <ChartTooltip />
             </VisXYContainer>
           </ChartContainer>
         </CardContent>
