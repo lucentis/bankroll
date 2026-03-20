@@ -28,6 +28,12 @@ export interface WeekdayPoint {
   profit: number
 }
 
+export interface DonutSlice {
+  label: string
+  value: number
+  color: string
+}
+
 const WEEKDAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
 const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
@@ -102,11 +108,44 @@ export function useStatsCharts(sortedSessions: ComputedRef<Session[]>) {
     }))
   })
 
+  // Répartition sessions par type
+  const sessionsByType = computed<DonutSlice[]>(() => {
+    const types: { label: string; key: string; color: string }[] = [
+      { label: 'Cash Game', key: 'CASH_GAME', color: '#0284c7' },
+      { label: 'MTT',       key: 'MTT',       color: '#d97706' },
+      { label: 'SNG',       key: 'SNG',       color: '#16a34a' },
+      { label: 'Spin & Go', key: 'SPIN',      color: '#9333ea' },
+    ]
+    return types
+      .map(t => ({
+        label: t.label,
+        value: sortedSessions.value.filter(s => s.type === t.key).length,
+        color: t.color,
+      }))
+      .filter(s => s.value > 0)
+  })
+
+  // Répartition Live vs Online
+  const sessionsByVenue = computed<DonutSlice[]>(() => [
+    {
+      label: 'Live',
+      value: sortedSessions.value.filter(s => s.venue === 'LIVE').length,
+      color: '#d97706',
+    },
+    {
+      label: 'Online',
+      value: sortedSessions.value.filter(s => s.venue === 'ONLINE').length,
+      color: '#0284c7',
+    },
+  ].filter(s => s.value > 0))
+
   return {
     profitByMonth,
     winRateByStake,
     roiByTournamentType,
     itmDonut,
     sessionsByWeekday,
+    sessionsByType,
+    sessionsByVenue,
   }
 }

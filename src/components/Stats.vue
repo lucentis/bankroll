@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { VisXYContainer, VisGroupedBar, VisAxis, VisLine, VisArea, VisTooltip } from '@unovis/vue'
-import { GroupedBar } from '@unovis/ts'
+import { computed } from 'vue'
+import { VisXYContainer, VisGroupedBar, VisAxis, VisLine, VisArea, VisTooltip, VisSingleContainer, VisDonut, VisBulletLegend } from '@unovis/vue'
+import { GroupedBar, Donut } from '@unovis/ts'
 import {
   ChartContainer, ChartTooltip, ChartCrosshair,
   ChartTooltipContent, componentToString, type ChartConfig,
@@ -12,14 +13,15 @@ import { useStats } from '@/composables/useStats'
 import { useStatsCharts } from '@/composables/useStatsCharts'
 import { formatCurrency, formatDuration } from '@/utils/format'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { bankrollStore } from '@/store/bankroll'
 import type { BankrollPoint } from '@/types/stats'
-import type { MonthPoint, StakePoint, TournamentTypePoint, WeekdayPoint } from '@/composables/useStatsCharts'
+import type { MonthPoint, StakePoint, TournamentTypePoint, WeekdayPoint, DonutSlice } from '@/composables/useStatsCharts'
 import type { Period } from '@/types/stats'
 
 const { sortedSessions } = useSessions()
 const { selectedPeriod, chartData, currentBankroll } = useBankroll(sortedSessions)
-const { totalProfit, totalProfitPct, totalDurationMinutes, cashWinRate, tournamentROI, itmPct } = useStats(sortedSessions, currentBankroll)
-const { profitByMonth, winRateByStake, roiByTournamentType, itmDonut, sessionsByWeekday } = useStatsCharts(sortedSessions)
+const { totalProfit, totalProfitPct, totalDurationMinutes, cashWinRate, tournamentROI, itmPct, itmCount, tournamentSessions } = useStats(sortedSessions, currentBankroll)
+const { profitByMonth, winRateByStake, roiByTournamentType, itmDonut, sessionsByWeekday, sessionsByType, sessionsByVenue } = useStatsCharts(sortedSessions)
 
 // ---------------------------------------------------------------------------
 // Chart configs
@@ -61,6 +63,16 @@ const roiTooltip = {
   [GroupedBar.selectors.bar]: (d: TournamentTypePoint) =>
     tooltipLabel(d.type, `ROI ${d.roi >= 0 ? '+' : ''}${d.roi.toFixed(1)}%`),
 }
+
+const donutTooltip = (d: DonutSlice) =>
+  tooltipLabel(d.label, `${d.value} session${d.value > 1 ? 's' : ''}`)
+
+const typeLegendItems = computed(() =>
+  sessionsByType.value.map(s => ({ name: s.label, color: s.color })),
+)
+const venueLegendItems = computed(() =>
+  sessionsByVenue.value.map(s => ({ name: `${s.label} (${sortedSessions.value.length > 0 ? ((s.value / sortedSessions.value.length) * 100).toFixed(0) : 0}%)`, color: s.color })),
+)
 </script>
 
 <template>
@@ -107,7 +119,61 @@ const roiTooltip = {
     </div>
 
     <!-- ------------------------------------------------------------------ -->
-    <!-- Bankroll evolution                                                   -->
+    <!-- Répartition sessions                                                 -->
+    <!-- ------------------------------------------------------------------ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- Par type -->
+      <Card class="border-stone-200 shadow-sm">
+        <CardHeader>
+          <CardTitle class="text-sm font-medium text-stone-500">Sessions par type</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="flex flex-col items-center gap-3">
+            <VisSingleContainer :data="sessionsByType" class="h-36 w-36">
+              <VisDonut
+                :value="(d: DonutSlice) => d.value"
+                :color="(d: DonutSlice) => d.color"
+                :arc-width="26"
+                :central-label="`${sortedSessions.length}`"
+                central-sub-label="sessions"
+              />
+              <VisTooltip
+                :triggers="{
+                  [Donut.selectors.segment]: (d: any) => {
+                    const slice: DonutSlice = d?.data ?? d
+                    return tooltipLabel(slice.label, `${slice.value} (${sortedSessions.length > 0 ? ((slice.value / sortedSessions.length) * 100).toFixed(0) : 0}%)`)
+                  }
+                }"
+              />
+            </VisSingleContainer>
+            <VisBulletLegend :items="typeLegendItems" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Live vs Online -->
+      <Card class="border-stone-200 shadow-sm">
+        <CardHeader>
+          <CardTitle class="text-sm font-medium text-stone-500">Live vs Online</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="flex flex-col items-center gap-3">
+            <VisSingleContainer :data="sessionsByVenue" class="h-36 w-36">
+              <VisDonut
+                :value="(d: DonutSlice) => d.value"
+                :color="(d: DonutSlice) => d.color"
+                :arc-width="26"
+              />
+            </VisSingleContainer>
+            <VisBulletLegend :items="venueLegendItems" />
+          </div>
+        </CardContent>
+      </Card>
+
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
     <!-- ------------------------------------------------------------------ -->
     <Card class="border-stone-200 shadow-sm">
       <CardHeader>
