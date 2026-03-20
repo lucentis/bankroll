@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { bankrollStore } from '@/store/bankroll';
 </script>
 
 <template>
@@ -20,7 +21,7 @@ import {
     <div class="grow" />
 
     <!-- Add session -->
-    <Button variant="default" size="sm" class="gap-1.5">
+    <Button variant="default" size="sm" class="gap-1.5" @click="bankrollStore.activePage = 'session-create'">
       <PlusCircle class="w-4 h-4" />
       Nouvelle session
     </Button>

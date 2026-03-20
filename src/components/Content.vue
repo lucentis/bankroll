@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Dashboard from './Dashboard.vue';
-import Session from './Session.vue';
-import Sessions from './Sessions.vue';
+import Session from './session/Session.vue';
+import SessionCreate from './session/SessionCreate.vue';
+import Sessions from './session/Sessions.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { bankrollStore } from '@/store/bankroll';
 
@@ -23,6 +24,10 @@ import { bankrollStore } from '@/store/bankroll';
             </TabsContent>
             <TabsContent value="session">
                 <Session></Session>
+            </TabsContent>
+
+            <TabsContent value="session-create">
+                <SessionCreate />
             </TabsContent>
         </Tabs>
     </div>
