@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Dashboard from './Dashboard.vue';
+import Session from './Session.vue';
 import Sessions from './Sessions.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { bankrollStore } from '@/store/bankroll';
@@ -19,6 +20,9 @@ import { bankrollStore } from '@/store/bankroll';
             </TabsContent>
             <TabsContent value="sessions">
                 <Sessions></Sessions>
+            </TabsContent>
+            <TabsContent value="session">
+                <Session></Session>
             </TabsContent>
         </Tabs>
     </div>

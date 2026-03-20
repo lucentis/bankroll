@@ -8,6 +8,7 @@ import { useSessions } from '@/composables/useSessions'
 import { ALL_TYPES, ALL_VENUES, useSessionFilters } from '@/composables/useSessionFilters'
 import { formatCurrency, sessionProfit } from '@/utils/format'
 import type { SortKey } from '@/types/session'
+import { bankrollStore } from '@/store/bankroll'
 
 const { sortedSessions } = useSessions()
 const {
@@ -40,6 +41,11 @@ const sortOptions: { key: SortKey; label: string }[] = [
 const totalProfit = computed(() =>
   filteredSessions.value.reduce((s, x) => s + sessionProfit(x), 0),
 )
+
+function goToSession(id: string) {
+  bankrollStore.activePage = 'session'
+  bankrollStore.activeSessionId = id
+}
 </script>
 
 <template>
@@ -142,11 +148,12 @@ const totalProfit = computed(() =>
     </div>
 
     <!-- Session list -->
-    <div v-if="filteredSessions.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div v-if="filteredSessions.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
       <SessionCard
         v-for="session in filteredSessions"
         :key="session.id"
         :session="session"
+        @click="goToSession(session.id)"
       />
     </div>
 

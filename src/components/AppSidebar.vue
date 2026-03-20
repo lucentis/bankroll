@@ -8,6 +8,7 @@ import {
   BarChart3,
   Settings,
   ChevronRight,
+  TrendingUp,
 } from 'lucide-vue-next'
 import {
   Sidebar,
@@ -28,10 +29,28 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { TrendingUp } from 'lucide-vue-next'
 import { bankrollStore } from '@/store/bankroll'
+import { ALL_TYPES, ALL_VENUES } from '@/composables/useSessionFilters'
 
 const sessionsOpen = ref(true)
+
+const goToSessions = () => {
+  bankrollStore.sessionFilters.types = [...ALL_TYPES]
+  bankrollStore.sessionFilters.venues = [...ALL_VENUES]
+  bankrollStore.activePage = 'sessions'
+}
+
+const goToCashGame = () => {
+  bankrollStore.sessionFilters.types = ['CASH_GAME']
+  bankrollStore.sessionFilters.venues = [...ALL_VENUES]
+  bankrollStore.activePage = 'sessions'
+}
+
+const goToTournois = () => {
+  bankrollStore.sessionFilters.types = ['MTT', 'SNG', 'SPIN']
+  bankrollStore.sessionFilters.venues = [...ALL_VENUES]
+  bankrollStore.activePage = 'sessions'
+}
 </script>
 
 <template>
@@ -56,9 +75,10 @@ const sessionsOpen = ref(true)
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
+
             <!-- Dashboard -->
-            <SidebarMenuItem @click="bankrollStore.activePage = 'dashboard'">
-              <SidebarMenuButton tooltip="Dashboard" is-active>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip="Dashboard" @click="bankrollStore.activePage = 'dashboard'">
                 <LayoutDashboard />
                 <span>Dashboard</span>
               </SidebarMenuButton>
@@ -68,7 +88,7 @@ const sessionsOpen = ref(true)
             <Collapsible v-model:open="sessionsOpen" as-child>
               <SidebarMenuItem>
                 <CollapsibleTrigger as-child>
-                  <SidebarMenuButton tooltip="Sessions">
+                  <SidebarMenuButton tooltip="Sessions" @click="goToSessions">
                     <ListVideo />
                     <span>Sessions</span>
                     <ChevronRight
@@ -79,25 +99,25 @@ const sessionsOpen = ref(true)
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    <SidebarMenuSubItem @click="bankrollStore.activePage = 'sessions'">
+                    <SidebarMenuSubItem>
                       <SidebarMenuSubButton as-child>
-                        <a href="#">
+                        <a href="#" @click.prevent="goToSessions">
                           <ListVideo class="size-3.5" />
                           <span>Toutes</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
-                    <SidebarMenuSubItem @click="bankrollStore.activePage = 'sessions'">
+                    <SidebarMenuSubItem>
                       <SidebarMenuSubButton as-child>
-                        <a href="#">
+                        <a href="#" @click.prevent="goToCashGame">
                           <Coins class="size-3.5" />
                           <span>Cash Game</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
-                    <SidebarMenuSubItem @click="bankrollStore.activePage = 'sessions'">
+                    <SidebarMenuSubItem>
                       <SidebarMenuSubButton as-child>
-                        <a href="#">
+                        <a href="#" @click.prevent="goToTournois">
                           <Trophy class="size-3.5" />
                           <span>Tournois</span>
                         </a>
