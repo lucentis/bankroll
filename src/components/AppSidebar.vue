@@ -14,7 +14,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -30,6 +29,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { TrendingUp } from 'lucide-vue-next'
+import { bankrollStore } from '@/store/bankroll'
 
 const sessionsOpen = ref(true)
 </script>
@@ -56,9 +56,8 @@ const sessionsOpen = ref(true)
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-
             <!-- Dashboard -->
-            <SidebarMenuItem>
+            <SidebarMenuItem @click="bankrollStore.activePage = 'dashboard'">
               <SidebarMenuButton tooltip="Dashboard" is-active>
                 <LayoutDashboard />
                 <span>Dashboard</span>
@@ -80,7 +79,7 @@ const sessionsOpen = ref(true)
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    <SidebarMenuSubItem>
+                    <SidebarMenuSubItem @click="bankrollStore.activePage = 'sessions'">
                       <SidebarMenuSubButton as-child>
                         <a href="#">
                           <ListVideo class="size-3.5" />
@@ -88,7 +87,7 @@ const sessionsOpen = ref(true)
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
+                    <SidebarMenuSubItem @click="bankrollStore.activePage = 'sessions'">
                       <SidebarMenuSubButton as-child>
                         <a href="#">
                           <Coins class="size-3.5" />
@@ -96,7 +95,7 @@ const sessionsOpen = ref(true)
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
+                    <SidebarMenuSubItem @click="bankrollStore.activePage = 'sessions'">
                       <SidebarMenuSubButton as-child>
                         <a href="#">
                           <Trophy class="size-3.5" />

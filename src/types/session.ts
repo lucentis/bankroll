@@ -15,3 +15,6 @@ export interface Session {
   position?: number // tournament only
   notes?: string
 }
+
+export type SortKey = 'date' | 'profit' | 'duration' | 'buyIn'
+export type SortDir = 'asc' | 'desc'

@@ -1,34 +1,33 @@
 import { ref, computed } from 'vue'
+import { bankrollStore } from '@/store/bankroll'
 import { sessionProfit } from '@/utils/format'
 import type { ComputedRef } from 'vue'
-import type { Session, SessionType, Venue } from '@/types/session'
+import type { Session, SessionType, SortDir, SortKey, Venue } from '@/types/session'
 
-export type SortKey = 'date' | 'profit' | 'duration' | 'buyIn'
-export type SortDir = 'asc' | 'desc'
+export const ALL_TYPES: SessionType[] = ['CASH_GAME', 'MTT', 'SNG', 'SPIN']
+export const ALL_VENUES: Venue[] = ['LIVE', 'ONLINE']
 
-export interface SessionFilters {
-  types: SessionType[]
-  venues: Venue[]
-}
-
-const ALL_TYPES: SessionType[] = ['CASH_GAME', 'MTT', 'SNG', 'SPIN']
-const ALL_VENUES: Venue[] = ['LIVE', 'ONLINE']
+// Sort state stays local — not needed in the store
+const sortKey = ref<SortKey>('date')
+const sortDir = ref<SortDir>('desc')
 
 export function useSessionFilters(sortedSessions: ComputedRef<Session[]>) {
-  const filters = ref<SessionFilters>({ types: ['CASH_GAME', 'MTT'], venues: [...ALL_VENUES] })
-  const sortKey = ref<SortKey>('date')
-  const sortDir = ref<SortDir>('desc')
-
   const toggleType = (type: SessionType) => {
-    const idx = filters.value.types.indexOf(type)
-    if (idx === -1) filters.value.types.push(type)
-    else filters.value.types.splice(idx, 1)
+    console.log(bankrollStore.sessionFilters.types);
+    
+    const types = bankrollStore.sessionFilters.types
+    const idx = types.indexOf(type)
+    if (idx === -1) types.push(type)
+    else types.splice(idx, 1)
+    
+    console.log(bankrollStore.sessionFilters.types);
   }
 
   const toggleVenue = (venue: Venue) => {
-    const idx = filters.value.venues.indexOf(venue)
-    if (idx === -1) filters.value.venues.push(venue)
-    else filters.value.venues.splice(idx, 1)
+    const venues = bankrollStore.sessionFilters.venues
+    const idx = venues.indexOf(venue)
+    if (idx === -1) venues.push(venue)
+    else venues.splice(idx, 1)
   }
 
   const setSort = (key: SortKey) => {
@@ -37,9 +36,13 @@ export function useSessionFilters(sortedSessions: ComputedRef<Session[]>) {
   }
 
   const filteredSessions = computed<Session[]>(() => {
+    const activeTypes = bankrollStore.sessionFilters.types
+    const activeVenues = bankrollStore.sessionFilters.venues
+
     const filtered = sortedSessions.value.filter(s =>
-      filters.value.types.includes(s.type) &&
-      filters.value.venues.includes(s.venue),
+      // empty array = no filter applied (show all)
+      (activeTypes.length === 0 || activeTypes.includes(s.type)) &&
+      (activeVenues.length === 0 || activeVenues.includes(s.venue)),
     )
 
     return [...filtered].sort((a, b) => {
@@ -54,20 +57,32 @@ export function useSessionFilters(sortedSessions: ComputedRef<Session[]>) {
     })
   })
 
-  const isAllTypes = computed(() => filters.value.types.length === ALL_TYPES.length)
-  const isAllVenues = computed(() => filters.value.venues.length === ALL_VENUES.length)
+  const isTypeActive = (type: SessionType) =>
+    bankrollStore.sessionFilters.types.length === 0 ||
+    bankrollStore.sessionFilters.types.includes(type)
+
+  const isVenueActive = (venue: Venue) =>
+    bankrollStore.sessionFilters.venues.length === 0 ||
+    bankrollStore.sessionFilters.venues.includes(venue)
+
+  const isAllTypes = computed(() => bankrollStore.sessionFilters.types.length === 0)
+  const isAllVenues = computed(() => bankrollStore.sessionFilters.venues.length === 0)
+  const hasActiveFilters = computed(() => !isAllTypes.value || !isAllVenues.value)
 
   const resetFilters = () => {
-    filters.value = { types: ['CASH_GAME', 'MTT'], venues: [...ALL_VENUES] }
+    bankrollStore.sessionFilters.types = []
+    bankrollStore.sessionFilters.venues = []
   }
 
   return {
-    filters,
     sortKey,
     sortDir,
     filteredSessions,
+    isTypeActive,
+    isVenueActive,
     isAllTypes,
     isAllVenues,
+    hasActiveFilters,
     toggleType,
     toggleVenue,
     setSort,

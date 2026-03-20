@@ -1,27 +1,26 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, X } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import SessionCard from '@/components/SessionCard.vue'
 import { useSessions } from '@/composables/useSessions'
-import { useSessionFilters } from '@/composables/useSessionFilters'
+import { ALL_TYPES, ALL_VENUES, useSessionFilters } from '@/composables/useSessionFilters'
 import { formatCurrency, sessionProfit } from '@/utils/format'
-import type { SortKey } from '@/composables/useSessionFilters'
+import type { SortKey } from '@/types/session'
 
 const { sortedSessions } = useSessions()
 const {
-  filters,
   sortKey,
   sortDir,
   filteredSessions,
-  isAllTypes,
-  isAllVenues,
+  isTypeActive,
+  isVenueActive,
+  hasActiveFilters,
   toggleType,
   toggleVenue,
   setSort,
   resetFilters,
-  ALL_TYPES,
-  ALL_VENUES,
 } = useSessionFilters(sortedSessions)
 
 const typeLabel: Record<string, string> = {
@@ -41,10 +40,6 @@ const sortOptions: { key: SortKey; label: string }[] = [
 const totalProfit = computed(() =>
   filteredSessions.value.reduce((s, x) => s + sessionProfit(x), 0),
 )
-
-const hasActiveFilters = computed(() => !isAllTypes.value || !isAllVenues.value)
-
-import { computed } from 'vue'
 </script>
 
 <template>
@@ -72,7 +67,6 @@ import { computed } from 'vue'
     <!-- Filters + sort bar -->
     <div class="flex flex-wrap items-center gap-3">
 
-      <!-- Filter icon -->
       <span class="flex items-center gap-1.5 text-xs text-stone-400">
         <SlidersHorizontal class="w-3.5 h-3.5" />
         Filtres
@@ -86,7 +80,7 @@ import { computed } from 'vue'
           v-for="type in ALL_TYPES"
           :key="type"
           class="text-xs px-2.5 py-1 rounded-full border transition-colors duration-100 font-medium"
-          :class="filters.types.includes(type)
+          :class="isTypeActive(type)
             ? 'bg-primary text-primary-foreground border-primary'
             : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
           @click="toggleType(type)"
@@ -103,7 +97,7 @@ import { computed } from 'vue'
           v-for="venue in ALL_VENUES"
           :key="venue"
           class="text-xs px-2.5 py-1 rounded-full border transition-colors duration-100 font-medium"
-          :class="filters.venues.includes(venue)
+          :class="isVenueActive(venue)
             ? 'bg-primary text-primary-foreground border-primary'
             : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
           @click="toggleVenue(venue)"
@@ -112,7 +106,7 @@ import { computed } from 'vue'
         </button>
       </div>
 
-      <!-- Reset filters -->
+      <!-- Reset -->
       <button
         v-if="hasActiveFilters"
         class="flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600 transition-colors"

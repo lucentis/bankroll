@@ -10,7 +10,7 @@ import { bankrollStore } from '@/store/bankroll';
     <div class="overflow-auto">
 
         <Tabs v-model="bankrollStore.activePage" :default-value="bankrollStore.activePage">
-            <TabsList>
+            <TabsList class="hidden">
                 <TabsTrigger value="dashboard">db</TabsTrigger>
                 <TabsTrigger value="sessions">db</TabsTrigger>
             </TabsList>
