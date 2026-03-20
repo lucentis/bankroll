@@ -129,7 +129,7 @@ const goToTournois = () => {
             </Collapsible>
 
             <!-- Statistiques -->
-            <SidebarMenuItem>
+            <SidebarMenuItem @click="bankrollStore.activePage = 'stats'"">
               <SidebarMenuButton tooltip="Statistiques">
                 <BarChart3 />
                 <span>Statistiques</span>

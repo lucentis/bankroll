@@ -71,7 +71,7 @@ const submit = () => {
 
   addSession(session)
   bankrollStore.activeSessionId = session.id
-  bankrollStore.activePage = 'session-detail'
+  bankrollStore.activePage = 'session'
 }
 
 const goBack = () => {
@@ -108,7 +108,7 @@ const goBack = () => {
                 :key="t"
                 class="text-xs px-3 py-1.5 rounded-full border transition-colors duration-100 font-medium"
                 :class="type === t
-                  ? 'bg-primary text-primary-foreground border-primary'
+                  ? 'bg-primary/70 text-primary-foreground border-primary/10'
                   : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                 @click="type = t"
               >
@@ -127,7 +127,7 @@ const goBack = () => {
                 :key="v"
                 class="text-xs px-3 py-1.5 rounded-full border transition-colors duration-100 font-medium"
                 :class="venue === v
-                  ? 'bg-primary text-primary-foreground border-primary'
+                  ? 'bg-primary/70 text-primary-foreground border-primary/10'
                   : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                 @click="venue = v"
               >

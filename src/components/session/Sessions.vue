@@ -87,7 +87,7 @@ function goToSession(id: string) {
           :key="type"
           class="text-xs px-2.5 py-1 rounded-full border transition-colors duration-100 font-medium"
           :class="isTypeActive(type)
-            ? 'bg-primary text-primary-foreground border-primary'
+            ? 'bg-primary/70 text-primary-foreground border-primary/10'
             : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
           @click="toggleType(type)"
         >
@@ -104,7 +104,7 @@ function goToSession(id: string) {
           :key="venue"
           class="text-xs px-2.5 py-1 rounded-full border transition-colors duration-100 font-medium"
           :class="isVenueActive(venue)
-            ? 'bg-primary text-primary-foreground border-primary'
+            ? 'bg-primary/70 text-primary-foreground border-primary/10'
             : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
           @click="toggleVenue(venue)"
         >
@@ -133,7 +133,7 @@ function goToSession(id: string) {
             :key="opt.key"
             class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors duration-100 font-medium"
             :class="sortKey === opt.key
-              ? 'bg-primary text-primary-foreground border-primary'
+              ? 'bg-primary/70 text-primary-foreground border-primary/10'
               : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
             @click="setSort(opt.key)"
           >
