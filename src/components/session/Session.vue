@@ -191,7 +191,7 @@ const goBack = () => {
 
     <!-- Actions -->
     <div class="flex items-center gap-3 pt-2">
-      <Button variant="outline" class="flex-1 gap-2">
+      <Button variant="outline" class="flex-1 gap-2" @click="bankrollStore.activePage = 'session-edit'">
         <Pencil class="w-4 h-4" />
         Modifier la session
       </Button>
