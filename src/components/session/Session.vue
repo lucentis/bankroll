@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import {
   ArrowLeft, MapPin, Clock, Calendar, Users, Trophy,
   TrendingUp, TrendingDown, Pencil, Trash2,
@@ -18,11 +18,14 @@ import { useSessions } from '@/composables/useSessions'
 import { formatCurrency, formatDuration, sessionProfit } from '@/utils/format'
 import HandCard from '@/components/hand/HandCard.vue'
 import { useHands } from '@/composables/useHands'
+import HandDetailDialog from '@/components/hand/HandDetailDialog.vue'
+import type { Hand } from '@/types/hand'
 
+
+const selectedHand = ref<Hand | null>(null)
+const handDialogOpen = ref(false)
 const { sessionHands } = useHands(bankrollStore.activeSessionId ?? undefined)
-
 const { sortedSessions, deleteSession } = useSessions()
-
 const session = computed(() =>
   sortedSessions.value.find(s => s.id === bankrollStore.activeSessionId) ?? null,
 )
@@ -46,6 +49,11 @@ const handleDelete = () => {
   deleteSession(session.value.id)
   bankrollStore.activePage = 'sessions'
   bankrollStore.activeSessionId = null
+}
+
+const openHand = (hand: Hand) => {
+  selectedHand.value = hand
+  handDialogOpen.value = true
 }
 </script>
 
@@ -254,11 +262,18 @@ const handleDelete = () => {
             v-for="hand in sessionHands"
             :key="hand.id"
             :hand="hand"
+            @click="openHand(hand)"
           />
         </div>
         <p v-else class="text-xs text-stone-400 text-center py-6">
           Aucune main enregistrée pour cette session.
         </p>
+
+        <HandDetailDialog
+            :hand="selectedHand"
+            :open="handDialogOpen"
+            @update:open="handDialogOpen = $event"
+          />
       </div>
     </div>
   </div>
