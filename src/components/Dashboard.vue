@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator'
 import { INITIAL_BANKROLL } from '@/data/mockData'
 import { useSessions } from '@/composables/useSessions'
 import { useBankroll, PERIODS } from '@/composables/useBankroll'
-import { useStats } from '@/composables/useStats'
+import { useStatsKpis } from '@/composables/useStatsKpis'
 import {
   formatCurrency,
   formatDuration,
@@ -36,7 +36,7 @@ const {
   tournamentSessions, tournamentProfit, tournamentTotalBuyIn, tournamentROI,
   itmCount, itmPct,
   barData,
-} = useStats(sortedSessions, currentBankroll)
+} = useStatsKpis(sortedSessions, currentBankroll)
 
 const bankrollChartConfig = {
   bankroll: { label: 'Bankroll', color: '#d97706' },

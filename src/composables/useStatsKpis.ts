@@ -5,7 +5,7 @@ import type { ComputedRef } from 'vue'
 import type { Session } from '@/types/session'
 import type { BarPoint } from '@/types/stats'
 
-export function useStats(sortedSessions: ComputedRef<Session[]>, currentBankroll: ComputedRef<number>) {
+export function useStatsKpis(sortedSessions: ComputedRef<Session[]>, currentBankroll: ComputedRef<number>) {
   // Global
   const totalProfit = computed(() => currentBankroll.value - INITIAL_BANKROLL)
   const totalProfitPct = computed(() => (totalProfit.value / INITIAL_BANKROLL) * 100)

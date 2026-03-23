@@ -9,17 +9,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSessions } from '@/composables/useSessions'
 import { useBankroll, PERIODS } from '@/composables/useBankroll'
-import { useStats } from '@/composables/useStats'
+import { useStatsKpis } from '@/composables/useStatsKpis'
 import { useStatsCharts } from '@/composables/useStatsCharts'
 import { formatCurrency, formatDuration } from '@/utils/format'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { BankrollPoint } from '@/types/stats'
-import type { MonthPoint, StakePoint, TournamentTypePoint, DonutSlice, StakeVenuePoint } from '@/composables/useStatsCharts'
+import type { MonthPoint, StakePoint, TournamentTypePoint, DonutSlice, StakeVenuePoint } from '@/types/stats'
 import type { Period } from '@/types/stats'
 
 const { sortedSessions } = useSessions()
 const { selectedPeriod, chartData, currentBankroll } = useBankroll(sortedSessions)
-const { totalProfit, totalProfitPct, totalDurationMinutes, cashWinRate, tournamentROI, itmPct } = useStats(sortedSessions, currentBankroll)
+const { totalProfit, totalProfitPct, totalDurationMinutes, cashWinRate, tournamentROI, itmPct } = useStatsKpis(sortedSessions, currentBankroll)
 const { profitByMonth, winRateByStake, roiByTournamentType, itmDonut, sessionsByType, sessionsByVenue, profitByStakeAndVenue } = useStatsCharts(sortedSessions)
 
 // ---------------------------------------------------------------------------

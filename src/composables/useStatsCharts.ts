@@ -2,45 +2,7 @@ import { computed } from 'vue'
 import { sessionProfit } from '@/utils/format'
 import type { ComputedRef } from 'vue'
 import type { Session } from '@/types/session'
-
-export interface MonthPoint {
-  month: string // 'Jan 2026'
-  profit: number
-  cash: number
-  tournament: number
-}
-
-export interface StakePoint {
-  stake: string
-  profit: number
-  hours: number
-  winRate: number
-}
-
-export interface TournamentTypePoint {
-  type: string
-  roi: number
-  sessions: number
-  profit: number
-}
-
-export interface WeekdayPoint {
-  day: string
-  sessions: number
-  profit: number
-}
-
-export interface StakeVenuePoint {
-  stake: string
-  live: number
-  online: number
-}
-
-export interface DonutSlice {
-  label: string
-  value: number
-  color: string
-}
+import type { MonthPoint, StakePoint, TournamentTypePoint, WeekdayPoint, StakeVenuePoint, DonutSlice } from '@/types/stats'
 
 const WEEKDAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
 const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
@@ -136,6 +98,7 @@ export function useStatsCharts(sortedSessions: ComputedRef<Session[]>) {
       .sort((a, b) => a.stake.localeCompare(b.stake))
   })
 
+  
   const sessionsByType = computed<DonutSlice[]>(() => {
     const types: { label: string; key: string; color: string }[] = [
       { label: 'Cash Game', key: 'CASH_GAME', color: '#0284c7' },
