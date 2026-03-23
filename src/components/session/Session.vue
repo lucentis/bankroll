@@ -8,11 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle, DialogTrigger, DialogClose,
+} from '@/components/ui/dialog'
 import { bankrollStore } from '@/store/bankroll'
 import { useSessions } from '@/composables/useSessions'
 import { formatCurrency, formatDuration, sessionProfit } from '@/utils/format'
 
-const { sortedSessions } = useSessions()
+const { sortedSessions, deleteSession } = useSessions()
 
 const session = computed(() =>
   sortedSessions.value.find(s => s.id === bankrollStore.activeSessionId) ?? null,
@@ -31,12 +35,18 @@ const goBack = () => {
   bankrollStore.activePage = 'sessions'
   bankrollStore.activeSessionId = null
 }
+
+const handleDelete = () => {
+  if (!session.value) return
+  deleteSession(session.value.id)
+  bankrollStore.activePage = 'sessions'
+  bankrollStore.activeSessionId = null
+}
 </script>
 
 <template>
   <div v-if="session" class="p-6 max-w-2xl space-y-5">
 
-    <!-- Back -->
     <button
       class="flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-600 transition-colors"
       @click="goBack"
@@ -46,9 +56,7 @@ const goBack = () => {
     </button>
 
     <!-- Hero header -->
-    <div
-      class="rounded-xl p-6 border"
-    >
+    <div class="rounded-xl p-6 border">
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -71,11 +79,8 @@ const goBack = () => {
           </div>
         </div>
 
-        <!-- Profit big number -->
         <div class="text-right shrink-0">
-          <p class="text-xs uppercase tracking-widest mb-1"
-            :class="profit >= 0 ? 'text-emerald-600' : 'text-red-400'"
-          >
+          <p class="text-xs uppercase tracking-widest mb-1" :class="profit >= 0 ? 'text-emerald-600' : 'text-red-400'">
             Résultat
           </p>
           <div class="flex items-center gap-1 justify-end">
@@ -191,19 +196,41 @@ const goBack = () => {
 
     <!-- Actions -->
     <div class="flex items-center gap-3 pt-2">
-      <Button variant="outline" class="flex-1 gap-2" @click="bankrollStore.activePage = 'session-edit'">
+      <Button
+        variant="outline"
+        class="flex-1 gap-2"
+        @click="bankrollStore.activePage = 'session-edit'"
+      >
         <Pencil class="w-4 h-4" />
         Modifier la session
       </Button>
-      <Button variant="outline" class="gap-2 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-100">
-        <Trash2 class="w-4 h-4" />
-        Supprimer
-      </Button>
+
+      <Dialog>
+        <DialogTrigger as-child>
+          <Button variant="outline" class="gap-2 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-100">
+            <Trash2 class="w-4 h-4" />
+            Supprimer
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer la session ?</DialogTitle>
+            <DialogDescription>
+              Cette action est irréversible. La session sera définitivement supprimée.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose as-child>
+              <Button variant="outline">Annuler</Button>
+            </DialogClose>
+            <Button variant="destructive" @click="handleDelete">Supprimer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
 
   </div>
 
-  <!-- Fallback -->
   <div v-else class="flex items-center justify-center h-full text-stone-400 text-sm">
     Session introuvable.
   </div>
