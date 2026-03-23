@@ -252,7 +252,7 @@ const openHand = (hand: Hand) => {
             Historique des mains
             <span class="ml-1.5 text-stone-400 font-normal">({{ sessionHands.length }})</span>
           </h2>
-          <Button variant="outline" size="sm" class="gap-1.5 text-xs">
+          <Button variant="outline" size="sm" class="gap-1.5 text-xs" @click="bankrollStore.activePage = 'hand-create'">
             <PlusCircle class="w-3.5 h-3.5" />
             Ajouter
           </Button>

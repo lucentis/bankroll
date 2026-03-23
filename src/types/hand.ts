@@ -12,6 +12,7 @@ export interface Player {
   id: string        // 'hero' | 'villain_1' | 'villain_2' ...
   name: string      // 'Hero' | 'Villain 1' — editable
   stack: number     // stack de départ en €
+  position?: Position
 }
 
 export interface PlayerAction {

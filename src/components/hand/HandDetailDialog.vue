@@ -3,8 +3,7 @@ import { TrendingUp, TrendingDown } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { formatCurrency } from '@/utils/format'
 import type { Hand, HandTag, StreetActions } from '@/types/hand'
@@ -105,10 +104,10 @@ const boardCards = (street: StreetActions) => street.cards ?? []
 
 <template>
   <Dialog :open="open" @update:open="$emit('update:open', $event)">
-    <DialogContent class="md:max-w-2xl max-h-[85vh] overflow-y-auto">
+    <DialogContent class="max-w-3xl max-h-[85vh] overflow-y-auto">
       <template v-if="hand">
         <DialogHeader>
-          <DialogTitle>Votre main</DialogTitle>
+          <DialogTitle class="mb-4">Votre main</DialogTitle>
           <DialogDescription class="sr-only">Détail de la main</DialogDescription>
           <!-- Hole cards + position + result -->
           <div class="flex items-start justify-between gap-4">
@@ -173,6 +172,9 @@ const boardCards = (street: StreetActions) => street.cards ?? []
                   {{ player.id }}
                 </span>
                 <span class="text-sm text-stone-600">{{ player.name }}</span>
+                <span v-if="player.position" class="text-xs font-mono text-stone-400 border border-stone-200 rounded px-1.5 py-0.5">
+                  {{ player.position }}
+                </span>
               </div>
               <span class="text-sm font-mono font-semibold text-stone-700">
                 {{ formatCurrency(player.stack) }}
