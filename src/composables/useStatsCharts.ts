@@ -6,6 +6,8 @@ import type { Session } from '@/types/session'
 export interface MonthPoint {
   month: string // 'Jan 2026'
   profit: number
+  cash: number
+  tournament: number
 }
 
 export interface StakePoint {
@@ -28,6 +30,12 @@ export interface WeekdayPoint {
   profit: number
 }
 
+export interface StakeVenuePoint {
+  stake: string
+  live: number
+  online: number
+}
+
 export interface DonutSlice {
   label: string
   value: number
@@ -40,12 +48,18 @@ const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', '
 export function useStatsCharts(sortedSessions: ComputedRef<Session[]>) {
   // Profit by month
   const profitByMonth = computed<MonthPoint[]>(() => {
-    const map = new Map<string, number>()
+    const map = new Map<string, { profit: number; cash: number; tournament: number }>()
     for (const s of sortedSessions.value) {
       const key = `${MONTHS_FR[s.date.getMonth()]} ${s.date.getFullYear()}`
-      map.set(key, (map.get(key) ?? 0) + sessionProfit(s))
+      const cur = map.get(key) ?? { profit: 0, cash: 0, tournament: 0 }
+      const p = sessionProfit(s)
+      map.set(key, {
+        profit: cur.profit + p,
+        cash: cur.cash + (s.type === 'CASH_GAME' ? p : 0),
+        tournament: cur.tournament + (s.type !== 'CASH_GAME' ? p : 0),
+      })
     }
-    return Array.from(map.entries()).map(([month, profit]) => ({ month, profit }))
+    return Array.from(map.entries()).map(([month, data]) => ({ month, ...data }))
   })
 
   // Winrate by stake (cash game only)
@@ -108,7 +122,20 @@ export function useStatsCharts(sortedSessions: ComputedRef<Session[]>) {
     }))
   })
 
-  // Répartition sessions par type
+  // Cash profit by stake split by venue
+  const profitByStakeAndVenue = computed<StakeVenuePoint[]>(() => {
+    const map = new Map<string, { live: number; online: number }>()
+    for (const s of sortedSessions.value) {
+      if (s.type !== 'CASH_GAME' || !s.stakes) continue
+      const cur = map.get(s.stakes) ?? { live: 0, online: 0 }
+      if (s.venue === 'LIVE') map.set(s.stakes, { ...cur, live: cur.live + sessionProfit(s) })
+      else map.set(s.stakes, { ...cur, online: cur.online + sessionProfit(s) })
+    }
+    return Array.from(map.entries())
+      .map(([stake, { live, online }]) => ({ stake, live, online }))
+      .sort((a, b) => a.stake.localeCompare(b.stake))
+  })
+
   const sessionsByType = computed<DonutSlice[]>(() => {
     const types: { label: string; key: string; color: string }[] = [
       { label: 'Cash Game', key: 'CASH_GAME', color: '#0284c7' },
@@ -147,5 +174,6 @@ export function useStatsCharts(sortedSessions: ComputedRef<Session[]>) {
     sessionsByWeekday,
     sessionsByType,
     sessionsByVenue,
+    profitByStakeAndVenue,
   }
 }
