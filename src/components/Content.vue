@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Dashboard from './Dashboard.vue';
-import HandCreate from './hand/HandCreate.vue';
+// import HandCreate from './hand/HandCreate.vue';
+import HandCreation from './hand/HandCreation.vue';
 import Session from './session/Session.vue';
 import SessionCreate from './session/SessionCreate.vue';
 import SessionEdit from './session/SessionEdit.vue';
@@ -45,7 +46,7 @@ import { bankrollStore } from '@/store/bankroll';
             </TabsContent>
 
             <TabsContent value="hand-create">
-                <HandCreate />
+                <HandCreation />
             </TabsContent>
         </Tabs>
     </div>
