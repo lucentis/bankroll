@@ -4,7 +4,7 @@ export type Position = 'UTG' | 'UTG+1' | 'MP' | 'HJ' | 'CO' | 'BTN' | 'SB' | 'BB
 
 export type Street = 'preflop' | 'flop' | 'turn' | 'river'
 
-export type Action = 'fold' | 'check' | 'call' | 'bet' | 'raise' | '3bet' | '4bet' | 'allin'
+export type Action = 'fold' | 'check' | 'call' | 'raise'
 
 export type HandTag = 'bluff' | 'hero-call' | 'bad-beat' | 'cooler' | 'value' | '3bet-pot' | 'multiway' | 'squeeze'
 
