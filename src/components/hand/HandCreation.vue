@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { bankrollStore } from '@/store/bankroll';
-import type { Card, PlayerAction, Position } from '@/types/hand';
+import type { Card, PlayerAction, Position, Player } from '@/types/hand';
 import { computed, reactive } from 'vue';
 import CardPicker from './CardPicker.vue';
 import { Separator } from '../ui/separator';
-import { Card as UiCard, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card as UiCard, CardContent, CardHeader, CardTitle, CardFooter } from '../ui/card';
 import { Button } from '../ui/button';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-vue-next';
 import type { Action } from '@/types/hand';
@@ -22,22 +22,23 @@ const session = bankrollStore.sessions.find(s => s.id === bankrollStore.activeSe
 const blinds = session?.stakes?.split('/')
 
 const setupState = reactive({
+    handStatus: 'setup',
     holeCards: [] as Card[],
     position: 'BTN',
     errors: {} as Record<string, string>,
     streets: [
-        { street: 'preflop', cards: [], actions: [] as PlayerAction[] },
-        { street: 'flop',    cards: [], actions: [] as PlayerAction[] },
-        { street: 'turn',    cards: [], actions: [] as PlayerAction[] },
-        { street: 'river',   cards: [], actions: [] as PlayerAction[] },
+        { street: 'preflop', cards: [], actions: [] as PlayerAction[], currentBet: 0, playersToAct: [], contributed: {} },
+        { street: 'flop',    cards: [], actions: [] as PlayerAction[], currentBet: 0, playersToAct: [], contributed: {} },
+        { street: 'turn',    cards: [], actions: [] as PlayerAction[], currentBet: 0, playersToAct: [], contributed: {} },
+        { street: 'river',   cards: [], actions: [] as PlayerAction[], currentBet: 0, playersToAct: [], contributed: {} },
     ],
     players: [
         { id: 'hero', name: 'Hero', stack: DEFAULT_STACK, position: 'BTN' },
     ],
     board: [] as Card[],
-    smallBlind: blinds?.[0] || 10,
-    bigBlind: blinds?.[1] || 20,
-    pot:0
+    smallBlind: Number(blinds?.[0]) || 10,
+    bigBlind: Number(blinds?.[1]) || 20,
+    pot: 0
 })
 
 const addPlayer = () => {
@@ -55,12 +56,6 @@ const addPlayer = () => {
     stack: DEFAULT_STACK,
     position: availablePosition,
   })
-
-  setupState.streets[0].actions.push({
-    playerId: id,
-    action: 'fold',
-    amount: undefined
-  })
 }
 
 const removePlayer = (id: string) => {
@@ -69,27 +64,54 @@ const removePlayer = (id: string) => {
   setupState.players = setupState.players.filter(p => p.id !== id)
 }
 
+const validatePlayers = () => {
+    // Préparer la liste des joueurs présents
+    const players = setupState.players
+    const contributed: Record<string, number> = {}
+
+    // Identifier SB et BB
+    const sbPlayer = players.find(p => p.position === 'SB')
+    const bbPlayer = players.find(p => p.position === 'BB')
+
+    // Retirer blindes des joueurs si présents
+    if (sbPlayer) {
+        const sb = setupState.smallBlind
+        sbPlayer.stack -= sb
+        contributed[sbPlayer.id] = sb
+        setupState.pot += sb
+    } else {
+        setupState.pot += setupState.smallBlind
+    }
+
+    if (bbPlayer) {
+        const bb = setupState.bigBlind
+        bbPlayer.stack -= bb
+        contributed[bbPlayer.id] = bb
+        setupState.pot += bb
+    } else {
+        setupState.pot += setupState.bigBlind
+    }
+
+    const playersToAct: Player[] = []
+
+    POSITIONS.forEach(pos => {
+        const p = players.find(pl => pl.position === pos)
+        if (p) {
+            playersToAct.push(p as Player)
+        }
+    })
+
+    console.log(players, playersToAct);
+    
+    //pot
+
+    //status
+}
+
 //----------------------------------------------------------------------------
 // Streets
 // ---------------------------------------------------------------------------
-const preflopOrder = computed(() => {
-  const order: string[] = []
-  const positionsOrder: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'BB']
-  
-  positionsOrder.forEach(pos => {
-    const player = setupState.players.find(p => p.position === pos)
-    if (player) order.push(player.id)
-  })
 
-  return order
-})
-
-const setAction = (streetIdx: number, actionIdx: number, action: Action) => {
-  setupState.streets[streetIdx].actions[actionIdx].action = action
-  if (action !== 'fold') {
-    setupState.streets[streetIdx].actions[actionIdx].amount = 0
-  }
-}
 
 //----------------------------------------------------------------------------
 // Utils
@@ -262,6 +284,9 @@ const getActionIndex = (streetIdx: number, playerId: string) =>
                     <div v-else class="w-4" />
                     </div>
                 </CardContent>
+                <CardFooter class="mx-auto">
+                    <Button @click="validatePlayers">Valider</Button>
+                </CardFooter>
             </UiCard>
 
         </div>
@@ -275,36 +300,6 @@ const getActionIndex = (streetIdx: number, playerId: string) =>
                 <CardContent></CardContent>
             </UiCard>
             
-            <div v-for="(playerId) in preflopOrder" :key="playerId" class="flex items-center gap-2">
-                <!-- Nom du joueur -->
-                <span class="w-24 font-mono">
-                {{ getPlayerById(playerId)?.name }}
-                </span>
-
-                <!-- Boutons d'action -->
-                <button
-                    v-for="action in ACTIONS"
-                    :key="action"
-                    type="button"
-                    class="text-xs px-2.5 py-1 rounded-full border font-medium transition-colors duration-100"
-                    :class="getActionByPlayer(0, playerId)?.action === action
-                        ? 'bg-primary/70 text-primary-foreground border-primary/10'
-                        : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                    @click="setAction(0, getActionIndex(0, playerId), action)"
-                >
-                {{ action }}
-                </button>
-
-                <!-- Input montant si action = raise -->
-                <input
-                    v-if="getActionByPlayer(0, playerId)?.action === 'raise'"
-                    v-model.number="getActionByPlayer(0, playerId)!.amount"
-                    type="number"
-                    min="1"
-                    placeholder="€"
-                    class="w-20 border rounded px-2 py-1 text-sm font-mono"
-                />
-            </div>
         </div>
     </div>
 

@@ -23,8 +23,11 @@ export interface PlayerAction {
 
 export interface StreetActions {
   street: Street
-  cards?: [Card, Card, Card] | [Card] // flop (3) ou turn/river (1), undefined pour preflop
+  cards?: string[]
   actions: PlayerAction[]
+  currentBet: number
+  playersToAct: Player[]
+  contributed: Record<string, number>
 }
 
 export interface Hand {
