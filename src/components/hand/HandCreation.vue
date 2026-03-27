@@ -44,13 +44,13 @@ const getStreetById = (streetId: Street) =>
 //----------------------------------------------------------------------------
 const DEFAULT_STACK = 100
 const POSITIONS: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'BB']
-const ACTION: Action[] = [ 'fold', 'call', 'check', 'raise']
+// const ACTION: Action[] = [ 'fold', 'call', 'check', 'raise']
 
 const session = bankrollStore.sessions.find(s => s.id === bankrollStore.activeSessionId)
 const blinds = session?.stakes?.split('/')
 
 const setupState = reactive({
-  handStatus: 'setup' as 'setup' | 'playing' | 'result',
+  handStatus: 'setup' as 'setup' | 'preflop' | 'flop' | 'turn' | 'river' | 'result',
 
   holeCards: [] as Card[],
   position: 'BTN' as Position,
@@ -146,7 +146,7 @@ const validatePlayers = () => {
     contributed: { ...contributed }
   }
 
-  setupState.handStatus = 'playing'
+  setupState.handStatus = 'preflop'
 }
 
 //----------------------------------------------------------------------------
@@ -180,6 +180,14 @@ const setAction = (action: Action) => {
 const setAmount = (amount: number | string) => {
     if (!currentAction.value) return
     currentAction.value.amount = Number(amount)
+}
+
+const isStreetComplete = () => {
+  const street = currentStreet.value!
+  return street.playersToAct.every(p => {
+    const contrib = street.contributed[p.id] || 0
+    return p.stack === 0 || contrib === street.currentBet
+  })
 }
 
 const validateAction = () => {
@@ -234,6 +242,25 @@ const validateAction = () => {
       // shift & push like the others
         const first = street.playersToAct.shift()!
         street.playersToAct.push(first)
+    }
+  }
+
+  if (isStreetComplete()) {
+    switch (setupState.handStatus) {
+        case 'preflop':
+            setupState.handStatus = 'flop'
+            break;
+        case 'flop': 
+            setupState.handStatus = 'turn'
+            break;
+        case 'turn':
+            setupState.handStatus = 'river'
+            break;
+        case 'river':
+            setupState.handStatus = 'result'
+            break;
+        default:
+            break;
     }
   }
 }
@@ -397,7 +424,6 @@ const validateAction = () => {
                 </CardHeader>
 
                 <CardContent>
-
                     <div class="space-y-1.5">
                         <h3 class="text-xs font-medium text-stone-500 flex justify-between">
                             <span>{{ currentPlayer?.name }}</span>
