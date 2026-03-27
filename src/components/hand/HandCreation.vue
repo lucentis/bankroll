@@ -183,31 +183,60 @@ const setAmount = (amount: number | string) => {
 }
 
 const validateAction = () => {
-    //fold
-    if (currentAction.value?.action == 'fold') {
-        currentStreet.value?.playersToAct.shift()
-    }
+  const street = currentStreet.value
+  const player = currentPlayer.value
+  const action = currentAction.value?.action
 
-    //check
-    if (currentAction.value?.action == 'check') {
-        const first = currentStreet.value?.playersToAct.shift()
-        currentStreet.value?.playersToAct.push(first!)
-    }
+  if (!street || !player || !action) return
 
-    // call
-    if (currentAction.value?.action == 'call') {
-        // stack
-        currentPlayer.value!.stack -= currentStreet.value!.currentBet
-        // contributed
-        currentStreet.value!.contributed[currentPlayer.value!.id] += toCall.value
+  const playerId = player.id
 
-        const first = currentStreet.value?.playersToAct.shift()
-        currentStreet.value?.playersToAct.push(first!)
+  if (action === 'fold') {
+    // remove player from the queue
+    street.playersToAct.shift()
+  }
+
+  if (action === 'check') {
+    // move player to the end of the queue
+    const first = street.playersToAct.shift()!
+    street.playersToAct.push(first)
+  }
+
+  if (action === 'call') {
+    const callAmount = toCall.value
+
+    // subtract from player's stack
+    player.stack -= callAmount
+
+    // update contributed
+    street.contributed[playerId]! += callAmount
+
+    // move player to the end of the queue
+    const first = street.playersToAct.shift()!
+    street.playersToAct.push(first)
+  }
+
+  if (action === 'raise') {
+    const raiseAmount = currentAction.value?.amount || 0
+    const callAmount = toCall.value
+    const totalContribution = callAmount + raiseAmount
+
+    // subtract from stack
+    player.stack -= totalContribution
+
+    // update contributed
+    street.contributed[playerId]! += totalContribution
+
+    // update currentBet if necessary
+    if (totalContribution > street.currentBet) {
+      street.currentBet = totalContribution
+
+      // shift & push like the others
+        const first = street.playersToAct.shift()!
+        street.playersToAct.push(first)
     }
-    //raise
-    
+  }
 }
-    
 </script>
 
 <template>
@@ -410,7 +439,18 @@ const validateAction = () => {
                                 <span>Call</span>
                             </button>
 
-                            <Input v-if="currentAction?.action == 'raise'" type="number" @update:model-value="setAmount"/>
+                            <button
+                                type="button"
+                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                :class="currentAction?.action === 'raise' && currentAction.playerId == currentPlayer?.id
+                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                @click="setAction('raise')"
+                            >
+                                <span>Raise</span>
+                            </button>
+
+                            <Input v-if="currentAction?.action == 'raise' && currentAction.playerId == currentPlayer?.id" type="number"  @update:model-value="setAmount"/>
 
                             <Button @click="validateAction">Valider</Button>
                         </div>
