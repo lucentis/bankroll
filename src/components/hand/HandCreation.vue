@@ -195,8 +195,17 @@ const validateAction = () => {
     }
 
     // call
+    if (currentAction.value?.action == 'call') {
+        // stack
+        currentPlayer.value!.stack -= currentStreet.value!.currentBet
+        // contributed
+        currentStreet.value!.contributed[currentPlayer.value!.id] += toCall.value
 
+        const first = currentStreet.value?.playersToAct.shift()
+        currentStreet.value?.playersToAct.push(first!)
+    }
     //raise
+    
 }
     
 </script>
@@ -387,6 +396,18 @@ const validateAction = () => {
                                 @click="setAction('check')"
                             >
                                 <span>Check</span>
+                            </button>
+
+                            <button
+                                v-if="toCall > 0"
+                                type="button"
+                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                :class="currentAction?.action === 'call' && currentAction.playerId == currentPlayer?.id
+                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                @click="setAction('call')"
+                            >
+                                <span>Call</span>
                             </button>
 
                             <Input v-if="currentAction?.action == 'raise'" type="number" @update:model-value="setAmount"/>
