@@ -177,9 +177,9 @@ const setAction = (action: Action) => {
     }
 }
 
-const setAmount = (amount: number) => {
+const setAmount = (amount: number | string) => {
     if (!currentAction.value) return
-    currentAction.value.amount = amount
+    currentAction.value.amount = Number(amount)
 }
 
 const validateAction = () => {
@@ -369,7 +369,7 @@ const validateAction = () => {
                             <button
                                 type="button"
                                 class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.action === 'fold'
+                                :class="currentAction?.action === 'fold' && currentAction.playerId == currentPlayer?.id
                                     ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                     : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                                 @click="setAction('fold')"
@@ -378,14 +378,15 @@ const validateAction = () => {
                             </button>
 
                             <button
+                                v-if="toCall === 0"
                                 type="button"
                                 class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.action === 'fold'
+                                :class="currentAction?.action === 'check' && currentAction.playerId == currentPlayer?.id
                                     ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                     : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                                @click="setAction('fold')"
+                                @click="setAction('check')"
                             >
-                                <span>Fold</span>
+                                <span>Check</span>
                             </button>
 
                             <Input v-if="currentAction?.action == 'raise'" type="number" @update:model-value="setAmount"/>
