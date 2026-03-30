@@ -25,9 +25,6 @@ export interface StreetActions {
   street: Street
   cards?: string[]
   actions: PlayerAction[]
-  currentBet: number
-  playersToAct: Player[]
-  contributed: Record<string, number>
 }
 
 export interface Hand {
