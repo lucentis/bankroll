@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { bankrollStore } from '@/store/bankroll';
 import type { Action, Card, PlayerAction, Position, } from '@/types/hand';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive } from 'vue';
 import CardPicker from './CardPicker.vue';
 import { Separator } from '../ui/separator';
 import { Card as UiCard, CardContent, CardHeader, CardTitle, CardFooter } from '../ui/card';
@@ -23,7 +23,7 @@ const { handState, currentPlayer, toCall, availableActions, addPlayer, removePla
 
 const currentAction = reactive<PlayerAction>({ 
     playerId: '',
-    action: 'fold',
+    type: 'fold',
     amount: 0
 })
 
@@ -31,7 +31,7 @@ const currentAction = reactive<PlayerAction>({
 // SETUP PLAYERS
 // ---------------------------------------------------------------------------
 const setAction = (action: Action) => {
-    currentAction.action = action
+    currentAction.type = action
     currentAction.playerId = currentPlayer.value.id
 }
 
@@ -40,13 +40,11 @@ const setAmount = (amount: number | string) => {
 }
 
 const validateAction = () => {
-    if (!currentAction.action) return
-
-    console.log('validate action');
+    if (!currentAction.type) return
     
     act(currentAction)
 
-    currentAction.action = 'fold'
+    currentAction.type = 'fold'
     currentAction.amount = 0
 }
 
@@ -242,7 +240,7 @@ const usedCards = computed<Card[]>(() => {
                             <button
                                 type="button"
                                 class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction.action === 'fold' && currentAction.playerId == currentPlayer?.id
+                                :class="currentAction.type === 'fold' && currentAction.playerId == currentPlayer?.id
                                     ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                     : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                                 @click="setAction('fold')"
@@ -254,7 +252,7 @@ const usedCards = computed<Card[]>(() => {
                                 v-if="toCall === 0"
                                 type="button"
                                 class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.action === 'check' && currentAction.playerId == currentPlayer?.id
+                                :class="currentAction?.type === 'check' && currentAction.playerId == currentPlayer?.id
                                     ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                     : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                                 @click="setAction('check')"
@@ -266,7 +264,7 @@ const usedCards = computed<Card[]>(() => {
                                 v-if="toCall > 0"
                                 type="button"
                                 class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.action === 'call' && currentAction.playerId == currentPlayer?.id
+                                :class="currentAction?.type === 'call' && currentAction.playerId == currentPlayer?.id
                                     ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                     : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                                 @click="setAction('call')"
@@ -277,7 +275,7 @@ const usedCards = computed<Card[]>(() => {
                             <button
                                 type="button"
                                 class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.action === 'raise' && currentAction.playerId == currentPlayer?.id
+                                :class="currentAction?.type === 'raise' && currentAction.playerId == currentPlayer?.id
                                     ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                     : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                                 @click="setAction('raise')"
@@ -285,7 +283,7 @@ const usedCards = computed<Card[]>(() => {
                                 <span>Raise</span>
                             </button>
 
-                            <Input v-if="currentAction?.action == 'raise' && currentAction.playerId == currentPlayer?.id" type="number"  @update:model-value="setAmount"/>
+                            <Input v-if="currentAction?.type == 'raise' && currentAction.playerId == currentPlayer?.id" type="number"  @update:model-value="setAmount"/>
 
                             <Button @click="validateAction">Valider</Button>
                         </div>

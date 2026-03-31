@@ -3,7 +3,8 @@ import type { Street, Action, PlayerAction } from '@/types/hand'
 
 
 export function useHandEngine(blinds: [number, number] = [1,2]) {
-    const POSITIONS: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'BB']
+    const POSITIONS_PREFLOP: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'BB']
+    const POSITIONS_STREET: Position[] = ['SB', 'BB', 'UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN']
 
     // ---------------------------------------------------------------------------
     // STATE
@@ -24,6 +25,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         holeCards: [],
         board: [],
 
+        playersInHand: [] as Player[],
         playersToAct: [] as Player[],
 
         actions: {
@@ -54,8 +56,6 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
     const availableActions = computed<ActionType[]>(() => {
         if (!currentPlayer.value) return []
-
-        console.log('to call: ', toCall.value);
         
         if (toCall.value === 0) {
             return ['check', 'raise']
@@ -74,7 +74,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
     function addPlayer() {
         const id = `villain_${handState.players.length}`
         const used = new Set(handState.players.map(p => p.position))
-        const pos = POSITIONS.find(p => !used.has(p))
+        const pos = POSITIONS_PREFLOP.find(p => !used.has(p))
         if (!pos) return
         
         const player = {
@@ -103,8 +103,9 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
         contributeBlinds(players)
 
-        // other state
-        handState.playersToAct = orderPlayersForPreflop(players)
+        // other 
+        handState.playersInHand = [...handState.players]
+        handState.playersToAct = orderPlayersForStreet(players, POSITIONS_PREFLOP)
         handState.status = 'playing'
         handState.street = 'preflop'
 
@@ -133,10 +134,10 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         handState.currentBet = handState.bigBlind
     }
 
-    function orderPlayersForPreflop(players) {
+    function orderPlayersForStreet(players, positions) {
         const order = []
 
-        POSITIONS.forEach(pos => {
+        positions.forEach(pos => {
             const p = players.find(pl => pl.position === pos)
             if (p) order.push(p as Player)
         })
@@ -155,13 +156,11 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         const playerId = player.id
         
         // ----- VALIDATION MINIMALE -----
-        if (!availableActions.value.includes(action.action)) return
-        console.log('has action', action.action);
+        if (!availableActions.value.includes(action.type)) return
+        console.log('has action', action.type);
 
         // ----- APPLY -----
-        if (action.action === 'fold') {
-            console.log('fold');
-            
+        if (action.type === 'fold') {
             removeFromInHand(playerId)
             removeFromToAct(playerId)
         }
@@ -191,14 +190,14 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
             handState.currentBet = handState.contributions[playerId]
 
             // 🔥 reset playersToAct (sauf lui)
-            const others = handState.players.filter(p => p.id !== playerId)
+            const others = handState.playersInHand.filter(p => p.id !== playerId)
             handState.playersToAct = [...others]
         }
 
         // ----- LOG -----
         handState.actions[handState.street].push({
             playerId,
-            action: action.action,
+            type: action.type,
             amount: action.amount,
         })
 
@@ -222,7 +221,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
     }
 
     function removeFromInHand(id: string) {
-        handState.players = handState.players.filter(p => p.id !== id)
+        handState.playersInHand = handState.playersInHand.filter(p => p.id !== id)
     }
 
     function isStreetFinished() {
@@ -230,7 +229,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
     }
 
     function isHandFinished() {
-        return handState.players.length === 1
+        return handState.playersInHand.length === 1
     }
 
     function nextStreet() {
@@ -244,7 +243,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         }
 
         // reset street
-        handState.playersToAct = [...handState.players]
+        handState.playersToAct = orderPlayersForStreet(handState.playersInHand, POSITIONS_STREET)
         handState.currentBet = 0
 
         handState.contributions = Object.fromEntries(

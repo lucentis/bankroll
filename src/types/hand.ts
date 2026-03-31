@@ -17,7 +17,7 @@ export interface Player {
 
 export interface PlayerAction {
   playerId: string  // référence Player.id
-  action: Action
+  type: Action
   amount?: number   // en €, undefined pour fold/check
 }
 
