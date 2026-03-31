@@ -177,13 +177,12 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
         if (action.type === 'raise') {
             const raiseAmount = action.amount || 0
-            const total = toCall.value + raiseAmount
 
-            player.stack -= total
-            handState.pot += total
-            handState.contributions[playerId] += total
+            player.stack -= raiseAmount
+            handState.pot += raiseAmount
+            handState.contributions[playerId] += raiseAmount
 
-            handState.currentBet = handState.contributions[playerId]
+            handState.currentBet = raiseAmount
 
             const currentIndex = orderedPlayers.value.findIndex(p => p.id === playerId)
 
