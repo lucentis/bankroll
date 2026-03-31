@@ -17,27 +17,27 @@ export const mockHands: Hand[] = [
       {
         street: 'preflop',
         actions: [
-          { playerId: 'villain_1', action: 'call',  amount: 2  },
-          { playerId: 'hero',      action: 'raise', amount: 10 },
-          { playerId: 'villain_1', action: 'call',  amount: 10 },
+          { playerId: 'villain_1', type: 'call',  amount: 2  },
+          { playerId: 'hero',      type: 'raise', amount: 10 },
+          { playerId: 'villain_1', type: 'call',  amount: 10 },
         ],
       },
       {
         street: 'flop',
         cards: ['Kd', '7h', '2c'],
         actions: [
-          { playerId: 'villain_1', action: 'check' },
-          { playerId: 'hero',      action: 'bet',  amount: 14 },
-          { playerId: 'villain_1', action: 'call', amount: 14 },
+          { playerId: 'villain_1', type: 'check' },
+          { playerId: 'hero',      type: 'raise',  amount: 14 },
+          { playerId: 'villain_1', type: 'call', amount: 14 },
         ],
       },
       {
         street: 'turn',
         cards: ['9s'],
         actions: [
-          { playerId: 'villain_1', action: 'check' },
-          { playerId: 'hero',      action: 'bet',  amount: 28 },
-          { playerId: 'villain_1', action: 'fold' },
+          { playerId: 'villain_1', type: 'check' },
+          { playerId: 'hero',      type: 'raise',  amount: 28 },
+          { playerId: 'villain_1', type: 'fold' },
         ],
       },
     ],
@@ -59,25 +59,25 @@ export const mockHands: Hand[] = [
       {
         street: 'preflop',
         actions: [
-          { playerId: 'hero',      action: 'raise', amount: 8  },
-          { playerId: 'villain_1', action: '3bet',  amount: 26 },
-          { playerId: 'hero',      action: 'call',  amount: 26 },
+          { playerId: 'hero',      type: 'raise', amount: 8  },
+          { playerId: 'villain_1', type: 'raise',  amount: 26 },
+          { playerId: 'hero',      type: 'call',  amount: 26 },
         ],
       },
       {
         street: 'flop',
         cards: ['Ac', 'Ts', '3h'],
         actions: [
-          { playerId: 'villain_1', action: 'bet',  amount: 32 },
-          { playerId: 'hero',      action: 'call', amount: 32 },
+          { playerId: 'villain_1', type: 'raise',  amount: 32 },
+          { playerId: 'hero',      type: 'call', amount: 32 },
         ],
       },
       {
         street: 'turn',
         cards: ['Kd'],
         actions: [
-          { playerId: 'villain_1', action: 'bet',  amount: 65 },
-          { playerId: 'hero',      action: 'fold' },
+          { playerId: 'villain_1', type: 'raise',  amount: 65 },
+          { playerId: 'hero',      type: 'fold' },
         ],
       },
     ],
@@ -100,18 +100,18 @@ export const mockHands: Hand[] = [
       {
         street: 'preflop',
         actions: [
-          { playerId: 'villain_1', action: 'call', amount: 2 },
-          { playerId: 'villain_2', action: 'call', amount: 2 },
-          { playerId: 'hero',      action: 'call', amount: 1 },
+          { playerId: 'villain_1', type: 'call', amount: 2 },
+          { playerId: 'villain_2', type: 'call', amount: 2 },
+          { playerId: 'hero',      type: 'call', amount: 1 },
         ],
       },
       {
         street: 'flop',
         cards: ['8h', '5d', '4h'],
         actions: [
-          { playerId: 'hero',      action: 'bet',  amount: 6 },
-          { playerId: 'villain_1', action: 'fold' },
-          { playerId: 'villain_2', action: 'fold' },
+          { playerId: 'hero',      type: 'raise',  amount: 6 },
+          { playerId: 'villain_1', type: 'fold' },
+          { playerId: 'villain_2', type: 'fold' },
         ],
       },
     ],
@@ -135,35 +135,35 @@ export const mockHands: Hand[] = [
       {
         street: 'preflop',
         actions: [
-          { playerId: 'hero',      action: 'raise', amount: 3  },
-          { playerId: 'villain_1', action: 'call',  amount: 3  },
+          { playerId: 'hero',      type: 'raise', amount: 3  },
+          { playerId: 'villain_1', type: 'call',  amount: 3  },
         ],
       },
       {
         street: 'flop',
         cards: ['Ah', '9d', '3c'],
         actions: [
-          { playerId: 'villain_1', action: 'check' },
-          { playerId: 'hero',      action: 'bet',   amount: 4  },
-          { playerId: 'villain_1', action: 'raise', amount: 14 },
-          { playerId: 'hero',      action: 'call',  amount: 14 },
+          { playerId: 'villain_1', type: 'check' },
+          { playerId: 'hero',      type: 'raise',   amount: 4  },
+          { playerId: 'villain_1', type: 'raise', amount: 14 },
+          { playerId: 'hero',      type: 'call',  amount: 14 },
         ],
       },
       {
         street: 'turn',
         cards: ['2s'],
         actions: [
-          { playerId: 'villain_1', action: 'bet',  amount: 20 },
-          { playerId: 'hero',      action: 'call', amount: 20 },
+          { playerId: 'villain_1', type: 'raise',  amount: 20 },
+          { playerId: 'hero',      type: 'call', amount: 20 },
         ],
       },
       {
         street: 'river',
         cards: ['Ks'],
         actions: [
-          { playerId: 'villain_1', action: 'check' },
-          { playerId: 'hero',      action: 'bet',  amount: 40 },
-          { playerId: 'villain_1', action: 'fold' },
+          { playerId: 'villain_1', type: 'check' },
+          { playerId: 'hero',      type: 'raise',  amount: 40 },
+          { playerId: 'villain_1', type: 'fold' },
         ],
       },
     ],
@@ -184,19 +184,19 @@ export const mockHands: Hand[] = [
       {
         street: 'preflop',
         actions: [
-          { playerId: 'villain_1', action: 'raise', amount: 3  },
-          { playerId: 'hero',      action: '3bet',  amount: 11 },
-          { playerId: 'villain_1', action: '4bet',  amount: 28 },
-          { playerId: 'hero',      action: 'call',  amount: 28 },
+          { playerId: 'villain_1', type: 'raise', amount: 3  },
+          { playerId: 'hero',      type: 'raise',  amount: 11 },
+          { playerId: 'villain_1', type: 'raise',  amount: 28 },
+          { playerId: 'hero',      type: 'call',  amount: 28 },
         ],
       },
       {
         street: 'flop',
         cards: ['As', 'Jh', '4d'],
         actions: [
-          { playerId: 'villain_1', action: 'bet',   amount: 30 },
-          { playerId: 'hero',      action: 'allin', amount: 72 },
-          { playerId: 'villain_1', action: 'call',  amount: 72 },
+          { playerId: 'villain_1', type: 'raise',   amount: 30 },
+          { playerId: 'hero',      type: 'raise', amount: 72 },
+          { playerId: 'villain_1', type: 'call',  amount: 72 },
         ],
       },
     ],

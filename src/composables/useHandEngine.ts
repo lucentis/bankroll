@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue'
-import type { Street, Action, PlayerAction } from '@/types/hand'
+import type { Street, Action, PlayerAction, Position, Player } from '@/types/hand'
 
 
 export function useHandEngine(blinds: [number, number] = [1,2]) {
@@ -54,7 +54,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         return handState.currentBet - (handState.contributions[id] || 0)
     })
 
-    const availableActions = computed<ActionType[]>(() => {
+    const availableActions = computed<Action[]>(() => {
         if (!currentPlayer.value) return []
         
         if (toCall.value === 0) {
@@ -202,7 +202,6 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         // ----- FLOW -----
         if (isHandFinished()) {
             handState.status = 'finished'
-            handState.street = 'result'
             return
         }
 
@@ -235,7 +234,6 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         else if (handState.street === 'flop') handState.street = 'turn'
         else if (handState.street === 'turn') handState.street = 'river'
         else {
-            handState.street = 'result'
             handState.status = 'finished'
         return
         }
@@ -249,8 +247,8 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         )
     }
 
-    function orderPlayersForStreet(players, positions) {
-        const order = []
+    function orderPlayersForStreet(players: Player[], positions: Position[]) {
+        const order:Player[] = []
 
         positions.forEach(pos => {
             const p = players.find(pl => pl.position === pos)

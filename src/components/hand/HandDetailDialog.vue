@@ -225,8 +225,8 @@ const boardCards = (street: StreetActions) => street.cards ?? []
                 >
                   {{ playerName(hand, action.playerId) }}
                 </span>
-                <span class="text-sm font-medium" :class="actionColors[action.action]">
-                  {{ actionLabels[action.action] }}
+                <span class="text-sm font-medium" :class="actionColors[action.type]">
+                  {{ actionLabels[action.type] }}
                 </span>
                 <span v-if="action.amount" class="text-sm font-mono text-stone-700">
                   {{ formatCurrency(action.amount) }}

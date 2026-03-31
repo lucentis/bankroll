@@ -37,7 +37,7 @@ describe('HandEngine - full flow', () => {
     const { handState, act, currentPlayer } = engine
     expect(currentPlayer.value.id).toBe('p1')
 
-    act({ type: 'fold' })
+    act({ type: 'fold', playerId: currentPlayer.value.id })
     expect(handState.playersInHand.find(p => p.id === 'p1')).toBeFalsy()
     expect(currentPlayer.value.id).toBe('p2')
   })
@@ -45,7 +45,7 @@ describe('HandEngine - full flow', () => {
   it('call updates stack, pot and contributions', () => {
     const { handState, act, currentPlayer } = engine
 
-    act({ type: 'call' }) // p1 calls BB=2
+    act({ type: 'call', playerId: currentPlayer.value.id }) // p1 calls BB=2
     expect(handState.contributions['p1']).toBe(2)
     expect(handState.pot).toBe(5)
     expect(currentPlayer.value.id).toBe('p2')
@@ -54,22 +54,22 @@ describe('HandEngine - full flow', () => {
   it('raise updates currentBet, contributions and restarts turn order', () => {
     const { handState, act, currentPlayer } = engine
 
-    act({ type: 'raise', amount: 6 }) // p1 raises
+    act({ type: 'raise', amount: 6, playerId: currentPlayer.value.id }) // p1 raises
     expect(handState.currentBet).toBe(6)
     expect(handState.contributions['p1']).toBe(6)
     expect(currentPlayer.value.id).toBe('p2') // next in order
   })
 
   it('street finishes correctly after all players act', () => {
-    const { handState, act } = engine
+    const { handState, act, currentPlayer } = engine
 
     // All call/check in preflop
-    act({ type: 'call' })  // p1
-    act({ type: 'call' })  // p2
-    act({ type: 'call' })  // p3
-    act({ type: 'call' })  // p4
-    act({ type: 'call' })  // p5
-    act({ type: 'check' }) // p6
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p1
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p2
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p3
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p4
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p5
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p6
 
     expect(handState.street).toBe('flop')
     expect(handState.currentBet).toBe(0)
@@ -77,14 +77,14 @@ describe('HandEngine - full flow', () => {
   })
 
   it('hand finishes when only one player remains', () => {
-    const { handState, act } = engine
+    const { handState, act, currentPlayer } = engine
 
     // everyone folds except BB
-    act({ type: 'fold' }) // p1
-    act({ type: 'fold' }) // p2
-    act({ type: 'fold' }) // p3
-    act({ type: 'fold' }) // p4
-    act({ type: 'fold' }) // p5
+    act({ type: 'fold', playerId: currentPlayer.value.id }) // p1
+    act({ type: 'fold', playerId: currentPlayer.value.id }) // p2
+    act({ type: 'fold', playerId: currentPlayer.value.id }) // p3
+    act({ type: 'fold', playerId: currentPlayer.value.id }) // p4
+    act({ type: 'fold', playerId: currentPlayer.value.id }) // p5
 
     expect(handState.playersInHand.length).toBe(1)
     expect(handState.status).toBe('finished')
@@ -92,26 +92,26 @@ describe('HandEngine - full flow', () => {
   })
 
   it('handles complex scenario with raise and multiple streets', () => {
-    const { handState, act } = engine
+    const { handState, act, currentPlayer } = engine
 
     // Preflop
-    act({ type: 'call' })  // p1
-    act({ type: 'raise', amount: 6 }) // p2
-    act({ type: 'call' })  // p3
-    act({ type: 'call' })  // p4
-    act({ type: 'call' })  // p5
-    act({ type: 'call' })  // p6 responds to raise
-    act({ type: 'call' })  // p1
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p1
+    act({ type: 'raise', amount: 6, playerId: currentPlayer.value.id }) // p2
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p3
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p4
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p5
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p6 responds to raise
+    act({ type: 'call', playerId: currentPlayer.value.id })  // p1
 
     expect(handState.street).toBe('flop')
 
     // Flop - all check
-    act({ type: 'check' }) // p1
-    act({ type: 'check' }) // p2
-    act({ type: 'check' }) // p3
-    act({ type: 'check' }) // p4
-    act({ type: 'check' }) // p5
-    act({ type: 'check' }) // p6
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p1
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p2
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p3
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p4
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p5
+    act({ type: 'check', playerId: currentPlayer.value.id }) // p6
 
     expect(handState.street).toBe('turn')
   })
