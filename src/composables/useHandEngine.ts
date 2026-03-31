@@ -22,7 +22,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
             { id: 'hero', name: 'Hero', stack: 100, position: 'BTN' }
         ] as Player[],
 
-        holeCards: [],
+        holeCards: [] as string[],
         board: [],
 
         playersInHand: [] as Player[],
@@ -64,6 +64,13 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         }
     })
 
+    const orderedPlayers = computed(() =>
+        orderPlayersForStreet(
+            handState.playersInHand,
+            handState.street === 'preflop' ? POSITIONS_PREFLOP : POSITIONS_STREET
+        )
+    )
+
     // ---------------------------------------------------------------------------
     // SETUP
     // ---------------------------------------------------------------------------
@@ -89,7 +96,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
     function removePlayer(player: Player) {
         if (player.id === 'hero') return
-        handState.players = handState.players.filter(p => p.id !== id)
+        handState.players = handState.players.filter(p => p.id !== player.id)
     }
     
     function startHand() {
@@ -105,7 +112,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
         // other 
         handState.playersInHand = [...handState.players]
-        handState.playersToAct = orderPlayersForStreet(players, POSITIONS_PREFLOP)
+        handState.playersToAct = [...orderedPlayers.value]
         handState.status = 'playing'
         handState.street = 'preflop'
 
@@ -134,16 +141,6 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         handState.currentBet = handState.bigBlind
     }
 
-    function orderPlayersForStreet(players, positions) {
-        const order = []
-
-        positions.forEach(pos => {
-            const p = players.find(pl => pl.position === pos)
-            if (p) order.push(p as Player)
-        })
-
-        return order
-    }
 
     // ---------------------------------------------------------------------------
     // CORE LOGIC
@@ -157,7 +154,6 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         
         // ----- VALIDATION MINIMALE -----
         if (!availableActions.value.includes(action.type)) return
-        console.log('has action', action.type);
 
         // ----- APPLY -----
         if (action.type === 'fold') {
@@ -189,9 +185,12 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
             handState.currentBet = handState.contributions[playerId]
 
-            // 🔥 reset playersToAct (sauf lui)
-            const others = handState.playersInHand.filter(p => p.id !== playerId)
-            handState.playersToAct = [...others]
+            const currentIndex = orderedPlayers.value.findIndex(p => p.id === playerId)
+
+            handState.playersToAct = [
+                ...orderedPlayers.value.slice(currentIndex + 1),
+                ...orderedPlayers.value.slice(0, currentIndex)
+            ]
         }
 
         // ----- LOG -----
@@ -235,7 +234,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
     function nextStreet() {
         if (handState.street === 'preflop') handState.street = 'flop'
         else if (handState.street === 'flop') handState.street = 'turn'
-        else if (state.street === 'turn') handState.street = 'river'
+        else if (handState.street === 'turn') handState.street = 'river'
         else {
             handState.street = 'result'
             handState.status = 'finished'
@@ -247,8 +246,19 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         handState.currentBet = 0
 
         handState.contributions = Object.fromEntries(
-            handState.players.map(p => [p.id, 0])
+            handState.playersInHand.map(p => [p.id, 0])
         )
+    }
+
+    function orderPlayersForStreet(players, positions) {
+        const order = []
+
+        positions.forEach(pos => {
+            const p = players.find(pl => pl.position === pos)
+            if (p) order.push(p as Player)
+        })
+
+        return order
     }
 
     // ---------------------------------------------------------------------------

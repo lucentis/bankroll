@@ -19,7 +19,7 @@ const POSITIONS: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'B
 const session = bankrollStore.sessions.find(s => s.id === bankrollStore.activeSessionId)
 const blinds = session?.stakes?.split('/').map(blind => Number(blind)) as [number, number] || [1,2]
 
-const { handState, currentPlayer, toCall, availableActions, addPlayer, removePlayer, startHand, act } = useHandEngine(blinds)
+const { handState, currentPlayer, toCall, addPlayer, removePlayer, startHand, act } = useHandEngine(blinds)
 
 const currentAction = reactive<PlayerAction>({ 
     playerId: '',
@@ -31,6 +31,7 @@ const currentAction = reactive<PlayerAction>({
 // SETUP PLAYERS
 // ---------------------------------------------------------------------------
 const setAction = (action: Action) => {
+    if (!currentPlayer.value) return
     currentAction.type = action
     currentAction.playerId = currentPlayer.value.id
 }
@@ -235,6 +236,10 @@ const usedCards = computed<Card[]>(() => {
                         <h3 class="text-xs font-medium text-stone-500 flex justify-between">
                             <span>{{ currentPlayer?.name }}</span>
                         </h3>
+
+                        <div class="actions">
+
+                        </div>
 
                         <div class="flex flex-wrap gap-1.5">
                             <button
