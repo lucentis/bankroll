@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { bankrollStore } from '@/store/bankroll';
 import type { Action, Card, PlayerAction, Position, } from '@/types/hand';
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import CardPicker from './CardPicker.vue';
 import { Separator } from '../ui/separator';
 import { Card as UiCard, CardContent, CardHeader, CardTitle, CardFooter } from '../ui/card';
@@ -9,6 +9,7 @@ import { Button } from '../ui/button';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-vue-next';
 import { Input } from '../ui/input';
 import { useHandEngine } from '@/composables/useHandEngine'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 
 // ---------------------------------------------------------------------------
@@ -26,6 +27,8 @@ const currentAction = reactive<PlayerAction>({
     type: 'fold',
     amount: 0
 })
+
+const currentTab = ref<string>('setup')
 
 // ---------------------------------------------------------------------------
 // SETUP PLAYERS
@@ -87,6 +90,18 @@ const usedCards = computed<Card[]>(() => {
         </button>
 
         <h1 class="text-2xl font-bold tracking-tight text-stone-900">Ajouter une main</h1>
+
+        <Tabs :default-value="currentTab" v-model="currentTab">
+            <TabsList class="w-full">
+                <TabsTrigger value="setup">Setup</TabsTrigger>
+                <TabsTrigger value="preflop">Préflop</TabsTrigger>
+                <TabsTrigger value="flop">Flop</TabsTrigger>
+                <TabsTrigger value="turn">Turn</TabsTrigger>
+                <TabsTrigger value="river">River</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="setup">hero</TabsContent>
+        </Tabs>
 
         <div class="text-sm text-slate-700/50 flex items-center gap-4">
             <span>Blindes:</span>
