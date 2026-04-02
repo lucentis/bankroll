@@ -52,6 +52,12 @@ const validateAction = () => {
     currentAction.amount = 0
 }
 
+const validateSetup = () => {
+    startHand()
+
+    currentTab.value = 'preflop'
+}
+
 // ---------------------------------------------------------------------------
 // Utils
 // ---------------------------------------------------------------------------
@@ -100,251 +106,252 @@ const usedCards = computed<Card[]>(() => {
                 <TabsTrigger value="river">River</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="setup">hero</TabsContent>
-        </Tabs>
-
-        <div class="text-sm text-slate-700/50 flex items-center gap-4">
-            <span>Blindes:</span>
-            <div class="flex items-center gap-2">
-                <Input v-model="handState.smallBlind" class="w-9"/>
-                <span>SB</span>
-            </div> 
-            <span>/</span>
-            <div class="flex items-center gap-2">
-                <Input v-model="handState.bigBlind" class="w-9"/>
-                <span>BB</span>
-            </div>
-
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <!-- Setup -->
-            <UiCard class="border-stone-200 shadow-sm">
-                <CardHeader>
-                    <CardTitle class="text-sm font-medium text-stone-500">Hole cards</CardTitle>
-                </CardHeader>
-                <CardContent class="space-y-4">
-
-                    <!-- Hole card preview -->
+            <TabsContent value="setup" class="py-4 space-y-4">
+                <div class="text-stone-700 flex items-center gap-4">
+                    <span class="font-medium">Blindes:</span>
                     <div class="flex items-center gap-2">
-                    <span
-                        v-for="card in handState.holeCards"
-                        :key="card"
-                        class="inline-flex items-center font-mono font-bold text-xl leading-none px-2 py-1.5 rounded-lg border-2 bg-white shadow-sm"
-                        :class="renderCard(card).color"
-                    >
-                        {{ renderCard(card).rank }}<span class="text-base">{{ renderCard(card).suit }}</span>
-                    </span>
-                    <span v-if="handState.holeCards.length === 0" class="text-sm text-stone-300">Aucune carte sélectionnée</span>
+                        <Input v-model="handState.smallBlind" class="w-9"/>
+                        <span>SB</span>
+                    </div> 
+                    <span>/</span>
+                    <div class="flex items-center gap-2">
+                        <Input v-model="handState.bigBlind" class="w-9"/>
+                        <span>BB</span>
                     </div>
-                    <p v-if="handState.errors.holeCards" class="text-xs text-red-500">{{ handState.errors.holeCards }}</p>
 
-                    <CardPicker
-                        v-model="handState.holeCards"
-                        :max="2"
-                        :disabled="usedCards.filter(c => !handState.holeCards.includes(c))"
-                    />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Setup -->
+                    <UiCard class="border-stone-200 shadow-sm">
+                        <CardHeader>
+                            <CardTitle class="text-sm font-medium text-stone-500">Mes cartes</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
 
-                    <Separator class="bg-stone-100" />
-
-                    <!-- Hero position -->
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-stone-500">Position du héro</label>
-                        <div class="flex flex-wrap gap-1.5">
-                            <button
-                                v-for="pos in POSITIONS"
-                                :key="pos"
-                                type="button"
-                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration-100"
-                                :class="handState.position === pos
-                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
-                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                                @click="handState.position = pos; handState.players[0].position = pos"
+                            <!-- Hole card preview -->
+                            <div class="flex items-center gap-2">
+                            <span
+                                v-for="card in handState.holeCards"
+                                :key="card"
+                                class="inline-flex items-center font-mono font-bold text-xl leading-none px-2 py-1.5 rounded-lg border-2 bg-white shadow-sm"
+                                :class="renderCard(card).color"
                             >
-                            {{ pos }}
-                            </button>
-                        </div>
-                    </div>
+                                {{ renderCard(card).rank }}<span class="text-base">{{ renderCard(card).suit }}</span>
+                            </span>
+                            <span v-if="handState.holeCards.length === 0" class="text-sm text-stone-300">Aucune carte sélectionnée</span>
+                            </div>
+                            <p v-if="handState.errors.holeCards" class="text-xs text-red-500">{{ handState.errors.holeCards }}</p>
 
-                </CardContent>
-            </UiCard>
+                            <CardPicker
+                                v-model="handState.holeCards"
+                                :max="2"
+                                :disabled="usedCards.filter(c => !handState.holeCards.includes(c))"
+                            />
 
-            <!-- Players -->
-            <UiCard class="border-stone-200 shadow-sm">
-                <CardHeader>
-                    <div class="flex items-center justify-between">
-                        <CardTitle class="text-sm font-medium text-stone-500">Joueurs</CardTitle>
-                        <Button variant="outline" size="sm" class="gap-1.5 text-xs" @click="addPlayer">
-                            <Plus class="w-3.5 h-3.5" />
-                            Ajouter un villain
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent class="space-y-3">
-                    <p v-if="handState.errors.stacks" class="text-xs text-red-500">{{ handState.errors.stacks }}</p>
-                    <div
-                        v-for="(player) in handState.players"
-                        :key="player.id"
-                        class="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center"
-                    >
-                    <!-- Name -->
-                    <input
-                        v-model="player.name"
-                        type="text"
-                        class="text-sm border border-stone-200 rounded-md px-3 py-1.5 text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                        :placeholder="player.id === 'hero' ? 'Hero' : 'Villain'"
-                    />
-                    <!-- Stack -->
-                    <div class="relative">
-                        <input
-                            v-model.number="player.stack"
-                            type="number"
-                            min="0"
-                            placeholder="100"
-                            class="w-full text-sm border border-stone-200 rounded-md px-3 py-1.5 font-mono text-stone-700 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                        />
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">€</span>
-                    </div>
-                    <!-- Position -->
-                    <select
-                        v-model="player.position"
-                        class="text-xs border border-stone-200 rounded-md px-2 py-1.5 font-mono text-stone-600 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    >
-                        <option value="">—</option>
-                        <option 
-                            v-for="pos in POSITIONS" 
-                            :key="pos" 
-                            :value="pos"
-                            :disabled="handState.players.some(p => p.position === pos && p.id !== player.id)"
-                        >{{ pos }}</option>
-                    </select>
-                    <!-- Remove (villains only) -->
-                    <button
-                        v-if="player.id !== 'hero'"
-                        type="button"
-                        class="text-stone-300 hover:text-red-400 transition-colors"
-                        @click="removePlayer(player)"
-                    >
-                        <Trash2 class="w-4 h-4" />
-                    </button>
-                    <div v-else class="w-4" />
-                    </div>
-                </CardContent>
-                <CardFooter class="mx-auto">
-                    <Button @click="startHand">Valider</Button>
-                </CardFooter>
-            </UiCard>
+                            <Separator class="bg-stone-100" />
 
-        </div>
-
-        <div class="space-y-2">
-            <UiCard class="border-stone-200 shadow-sm">
-                <CardHeader>
-                    <CardTitle class="font-medium text-stone-500 flex justify-between">
-                        <span> Préflop</span>
-                        <span class="text-xl">Pot: {{ handState.pot }}€</span>
-                    </CardTitle>
-                </CardHeader>
-
-                <CardContent>
-                    <div class="space-y-1.5">
-                        <h3 class="text-xs font-medium text-stone-500 flex justify-between">
-                            <span>{{ currentPlayer?.name }}</span>
-                        </h3>
-
-                        <div class="actions">
-
-                        </div>
-
-                        <div class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction.type === 'fold' && currentAction.playerId == currentPlayer?.id
-                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
-                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                                @click="setAction('fold')"
-                            >
-                                <span>Fold</span>
-                            </button>
-
-                            <button
-                                v-if="toCall === 0"
-                                type="button"
-                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.type === 'check' && currentAction.playerId == currentPlayer?.id
-                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
-                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                                @click="setAction('check')"
-                            >
-                                <span>Check</span>
-                            </button>
-
-                            <button
-                                v-if="toCall > 0"
-                                type="button"
-                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.type === 'call' && currentAction.playerId == currentPlayer?.id
-                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
-                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                                @click="setAction('call')"
-                            >
-                                <span>Call</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
-                                :class="currentAction?.type === 'raise' && currentAction.playerId == currentPlayer?.id
-                                    ? 'bg-primary/70 text-primary-foreground border-primary/10'
-                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
-                                @click="setAction('raise')"
-                            >
-                                <span>Raise</span>
-                            </button>
-
-                            <Input v-if="currentAction?.type == 'raise' && currentAction.playerId == currentPlayer?.id" type="number"  @update:model-value="setAmount"/>
-
-                            <Button @click="validateAction">Valider</Button>
-                        </div>
-                    </div>
-                    <!-- <div v-if="setupState.handStatus === 'playing'">
-
-                        
-
-                        <div v-if="currentPlayer" class="space-y-2">
-                            <div class="font-semibold">
-                                {{ currentPlayer.name }} ({{ currentPlayer.position }})
+                            <!-- Hero position -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-stone-500">Ma position</label>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button
+                                        v-for="pos in POSITIONS"
+                                        :key="pos"
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration-100"
+                                        :class="handState.position === pos
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="handState.position = pos; handState.players[0].position = pos"
+                                    >
+                                    {{ pos }}
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="text-xs text-stone-500">
-                                À payer: {{ toCall }}€
+                        </CardContent>
+                    </UiCard>
+
+                    <!-- Players -->
+                    <UiCard class="border-stone-200 shadow-sm">
+                        <CardHeader>
+                            <div class="flex items-center justify-between">
+                                <CardTitle class="text-sm font-medium text-stone-500">Joueurs</CardTitle>
+                                <Button variant="outline" size="sm" class="gap-1.5 text-xs" @click="addPlayer">
+                                    <Plus class="w-3.5 h-3.5" />
+                                    Ajouter un villain
+                                </Button>
                             </div>
-
-                            <div class="flex gap-2">
-                                <button @click="applyAction('fold')">Fold</button>
-
-                                <button v-if="toCall === 0" @click="applyAction('check')">Check</button>
-
-                                <button v-else @click="applyAction('call')">Call</button>
-
-                                <button @click="applyAction('raise', currentStreet.currentBet * 2)">
-                                Raise x2
-                                </button>
+                        </CardHeader>
+                        <CardContent class="space-y-3">
+                            <p v-if="handState.errors.stacks" class="text-xs text-red-500">{{ handState.errors.stacks }}</p>
+                            <div
+                                v-for="(player) in handState.players"
+                                :key="player.id"
+                                class="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center"
+                            >
+                            <!-- Name -->
+                            <input
+                                v-model="player.name"
+                                type="text"
+                                class="text-sm border border-stone-200 rounded-md px-3 py-1.5 text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                :placeholder="player.id === 'hero' ? 'Hero' : 'Villain'"
+                            />
+                            <!-- Stack -->
+                            <div class="relative">
+                                <input
+                                    v-model.number="player.stack"
+                                    type="number"
+                                    min="0"
+                                    placeholder="100"
+                                    class="w-full text-sm border border-stone-200 rounded-md px-3 py-1.5 font-mono text-stone-700 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                />
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">€</span>
                             </div>
-                        </div>
+                            <!-- Position -->
+                            <select
+                                v-model="player.position"
+                                class="text-xs border border-stone-200 rounded-md px-2 py-1.5 font-mono text-stone-600 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            >
+                                <option value="">—</option>
+                                <option 
+                                    v-for="pos in POSITIONS" 
+                                    :key="pos" 
+                                    :value="pos"
+                                    :disabled="handState.players.some(p => p.position === pos && p.id !== player.id)"
+                                >{{ pos }}</option>
+                            </select>
+                            <!-- Remove (villains only) -->
+                            <button
+                                v-if="player.id !== 'hero'"
+                                type="button"
+                                class="text-stone-300 hover:text-red-400 transition-colors"
+                                @click="removePlayer(player)"
+                            >
+                                <Trash2 class="w-4 h-4" />
+                            </button>
+                            <div v-else class="w-4" />
+                            </div>
+                        </CardContent>
+                        <CardFooter class="mx-auto">
+                            <Button @click="validateSetup">Valider</Button>
+                        </CardFooter>
+                    </UiCard>
 
-                    </div> -->
+                </div>
+            </TabsContent>
 
-                    <!-- <div v-if="setupState.handStatus === 'result'">
-                        <div class="text-green-600 font-bold">
-                        Main terminée
-                        </div>
-                    </div> -->
-                </CardContent>
-            </UiCard>
-            
-        </div>
+            <TabsContent value="preflop" class="py-4 space-y-4">
+                <div class="space-y-2">
+                    <UiCard class="border-stone-200 shadow-sm">
+                        <CardHeader>
+                            <CardTitle class="font-medium text-stone-500 flex justify-between">
+                                <span> Préflop</span>
+                                <span class="text-xl">Pot: {{ handState.pot }}€</span>
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            <div class="space-y-1.5">
+                                <h3 class="text-xs font-medium text-stone-500 flex justify-between">
+                                    <span>{{ currentPlayer?.name }}</span>
+                                </h3>
+
+                                <div class="actions">
+
+                                </div>
+
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction.type === 'fold' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('fold')"
+                                    >
+                                        <span>Fold</span>
+                                    </button>
+
+                                    <button
+                                        v-if="toCall === 0"
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction?.type === 'check' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('check')"
+                                    >
+                                        <span>Check</span>
+                                    </button>
+
+                                    <button
+                                        v-if="toCall > 0"
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction?.type === 'call' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('call')"
+                                    >
+                                        <span>Call</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction?.type === 'raise' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('raise')"
+                                    >
+                                        <span>Raise</span>
+                                    </button>
+
+                                    <Input v-if="currentAction?.type == 'raise' && currentAction.playerId == currentPlayer?.id" type="number"  @update:model-value="setAmount"/>
+
+                                    <Button @click="validateAction">Valider</Button>
+                                </div>
+                            </div>
+                            <!-- <div v-if="setupState.handStatus === 'playing'">
+
+                                
+
+                                <div v-if="currentPlayer" class="space-y-2">
+                                    <div class="font-semibold">
+                                        {{ currentPlayer.name }} ({{ currentPlayer.position }})
+                                    </div>
+
+                                    <div class="text-xs text-stone-500">
+                                        À payer: {{ toCall }}€
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button @click="applyAction('fold')">Fold</button>
+
+                                        <button v-if="toCall === 0" @click="applyAction('check')">Check</button>
+
+                                        <button v-else @click="applyAction('call')">Call</button>
+
+                                        <button @click="applyAction('raise', currentStreet.currentBet * 2)">
+                                        Raise x2
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div> -->
+
+                            <!-- <div v-if="setupState.handStatus === 'result'">
+                                <div class="text-green-600 font-bold">
+                                Main terminée
+                                </div>
+                            </div> -->
+                        </CardContent>
+                    </UiCard>
+                    
+                </div>
+            </TabsContent>
+        </Tabs>
     </div>
     <pre>action: {{  currentAction }}</pre>
     <pre>players: {{  handState }}</pre>
