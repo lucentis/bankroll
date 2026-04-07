@@ -53,6 +53,10 @@ const validateAction = () => {
 }
 
 const validateSetup = () => {
+    if(handState.holeCards.length !== 2) {
+        handState.errors.holeCards = "Choisir ses cartes avant de valider !"
+        return
+    }
     startHand()
 
     currentTab.value = 'preflop'
@@ -140,7 +144,7 @@ const usedCards = computed<Card[]>(() => {
                             </span>
                             <span v-if="handState.holeCards.length === 0" class="text-sm text-stone-300">Aucune carte sélectionnée</span>
                             </div>
-                            <p v-if="handState.errors.holeCards" class="text-xs text-red-500">{{ handState.errors.holeCards }}</p>
+                            <p v-if="handState.errors.holeCards && handState.holeCards.length !== 2" class="text-xs text-red-500">{{ handState.errors.holeCards }}</p>
 
                             <CardPicker
                                 v-model="handState.holeCards"
@@ -313,39 +317,6 @@ const usedCards = computed<Card[]>(() => {
                                     <Button @click="validateAction">Valider</Button>
                                 </div>
                             </div>
-                            <!-- <div v-if="setupState.handStatus === 'playing'">
-
-                                
-
-                                <div v-if="currentPlayer" class="space-y-2">
-                                    <div class="font-semibold">
-                                        {{ currentPlayer.name }} ({{ currentPlayer.position }})
-                                    </div>
-
-                                    <div class="text-xs text-stone-500">
-                                        À payer: {{ toCall }}€
-                                    </div>
-
-                                    <div class="flex gap-2">
-                                        <button @click="applyAction('fold')">Fold</button>
-
-                                        <button v-if="toCall === 0" @click="applyAction('check')">Check</button>
-
-                                        <button v-else @click="applyAction('call')">Call</button>
-
-                                        <button @click="applyAction('raise', currentStreet.currentBet * 2)">
-                                        Raise x2
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div> -->
-
-                            <!-- <div v-if="setupState.handStatus === 'result'">
-                                <div class="text-green-600 font-bold">
-                                Main terminée
-                                </div>
-                            </div> -->
                         </CardContent>
                     </UiCard>
                     
