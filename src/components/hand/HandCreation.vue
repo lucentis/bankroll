@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { bankrollStore } from '@/store/bankroll';
 import type { Action, Card, PlayerAction, Position, } from '@/types/hand';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import CardPicker from './CardPicker.vue';
 import { Separator } from '../ui/separator';
 import { Card as UiCard, CardContent, CardHeader, CardTitle, CardFooter } from '../ui/card';
@@ -20,7 +20,7 @@ const POSITIONS: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'B
 const session = bankrollStore.sessions.find(s => s.id === bankrollStore.activeSessionId)
 const blinds = session?.stakes?.split('/').map(blind => Number(blind)) as [number, number] || [1,2]
 
-const { handState, currentPlayer, toCall, addPlayer, removePlayer, startHand, act } = useHandEngine(blinds)
+const { handState, currentPlayer, toCall, addPlayer, removePlayer, startHand, act, getPlayerById } = useHandEngine(blinds)
 
 const currentAction = reactive<PlayerAction>({ 
     playerId: '',
@@ -29,6 +29,10 @@ const currentAction = reactive<PlayerAction>({
 })
 
 const currentTab = ref<string>('setup')
+
+watch(() => handState.street, (street) => {
+    currentTab.value = street
+})
 
 // ---------------------------------------------------------------------------
 // SETUP PLAYERS
@@ -85,6 +89,14 @@ const renderCard = (card: Card) => ({
 const usedCards = computed<Card[]>(() => {
   return [...handState.holeCards, ...handState.board];
 });
+
+const formatAction = (action: PlayerAction) => {
+    if (action.type === 'fold') return 'Fold'
+    if (action.type === 'check') return 'Check'
+    if (action.type === 'call') return `Call ${handState.currentBet}€`
+    if (action.type === 'raise') return action.amount ? `Raise to ${action.amount}€` : 'Raise'
+    return action.type
+}
 </script>
 
 <template>
@@ -248,36 +260,74 @@ const usedCards = computed<Card[]>(() => {
             <TabsContent value="preflop" class="py-4 space-y-4">
                 <div class="space-y-2">
                     <UiCard class="border-stone-200 shadow-sm">
+                        <!-- HEADER -->
                         <CardHeader>
-                            <CardTitle class="font-medium text-stone-500 flex justify-between">
-                                <span> Préflop</span>
-                                <span class="text-xl">Pot: {{ handState.pot }}€</span>
+                            <CardTitle class="flex justify-between items-center">
+                            <span class="text-stone-500">Préflop</span>
+                            <span class="font-mono text-lg">Pot: {{ handState.pot }}€</span>
                             </CardTitle>
                         </CardHeader>
 
-                        <CardContent>
-                            <div class="space-y-1.5">
-                                <h3 class="text-xs font-medium text-stone-500 flex justify-between">
-                                    <span>{{ currentPlayer?.name }}</span>
-                                </h3>
+                        <CardContent class="space-y-4">
 
-                                <div class="actions">
+                            <!-- 🧾 HISTORIQUE -->
+                            <div class="bg-stone-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+                                <ul class="space-y-1 text-sm">
+                                    <li 
+                                        v-for="(action, index) in handState.actions['preflop']"
+                                        :key="action.playerId + action.type + index"
+                                        class="flex justify-between"
+                                    >
+                                        <span class="font-medium">
+                                            {{ getPlayerById(action.playerId)?.name }}
+                                        </span>
+                                        <span class="text-stone-500">
+                                            {{ formatAction(action) }}
+                                        </span>
+                                    </li>
 
+                                    <li v-if="handState.actions['preflop'].length === 0" class="text-xs text-stone-400">
+                                    Aucune action pour le moment
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- 🎯 JOUEUR ACTUEL -->
+                            <div 
+                                class="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2 border border-primary/20"
+                                v-show="handState.street === 'preflop'"
+                            >
+                                <div>
+                                    <p class="text-xs text-stone-400">À jouer</p>
+                                    <p class="font-semibold text-stone-800">
+                                    {{ currentPlayer?.name || '—' }}
+                                    </p>
                                 </div>
 
-                                <div class="flex flex-wrap gap-1.5">
-                                    <button
+                                <div class="text-right">
+                                    <p class="text-xs text-stone-400">À payer</p>
+                                    <p class="font-mono text-lg">
+                                    {{ toCall }}€
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 🎮 ACTIONS -->
+                            <div class="space-y-2" v-show="handState.street === 'preflop'">
+                                <div class="flex flex-wrap gap-2">
+                                    <Button
                                         type="button"
                                         class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
                                         :class="currentAction.type === 'fold' && currentAction.playerId == currentPlayer?.id
                                             ? 'bg-primary/70 text-primary-foreground border-primary/10'
                                             : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
                                         @click="setAction('fold')"
+                                        v-if="toCall !== 0"
                                     >
                                         <span>Fold</span>
-                                    </button>
+                                    </Button>
 
-                                    <button
+                                    <Button
                                         v-if="toCall === 0"
                                         type="button"
                                         class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
@@ -287,9 +337,9 @@ const usedCards = computed<Card[]>(() => {
                                         @click="setAction('check')"
                                     >
                                         <span>Check</span>
-                                    </button>
+                                    </Button>
 
-                                    <button
+                                    <Button
                                         v-if="toCall > 0"
                                         type="button"
                                         class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
@@ -299,9 +349,9 @@ const usedCards = computed<Card[]>(() => {
                                         @click="setAction('call')"
                                     >
                                         <span>Call</span>
-                                    </button>
+                                    </Button>
 
-                                    <button
+                                    <Button
                                         type="button"
                                         class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
                                         :class="currentAction?.type === 'raise' && currentAction.playerId == currentPlayer?.id
@@ -310,15 +360,22 @@ const usedCards = computed<Card[]>(() => {
                                         @click="setAction('raise')"
                                     >
                                         <span>Raise</span>
-                                    </button>
+                                    </Button>
 
-                                    <Input v-if="currentAction?.type == 'raise' && currentAction.playerId == currentPlayer?.id" type="number"  @update:model-value="setAmount"/>
-
-                                    <Button @click="validateAction">Valider</Button>
                                 </div>
+
+                                <Input 
+                                    v-if="currentAction?.type == 'raise' && currentAction.playerId == currentPlayer?.id" 
+                                    type="number" 
+                                    @update:model-value="setAmount"
+                                    placeholder="Montant"
+                                />
+                                
+                                <Button @click="validateAction" class="w-full">Valider {{ formatAction(currentAction) }}</Button>
                             </div>
                         </CardContent>
-                    </UiCard>
+                    </UiCard>       
+                    
                     
                 </div>
             </TabsContent>

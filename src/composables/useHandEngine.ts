@@ -176,6 +176,10 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         }
 
         if (action.type === 'raise') {
+
+            // if (!canRaise(player, action)) throw new Error(`Player ${player.name} ne peut pas raise ${action.amount}`)
+            console.log(getMinRaise(currentPlayer.value))
+
             const raiseAmount = action.amount || 0
 
             player.stack -= raiseAmount
@@ -258,6 +262,15 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         return order
     }
 
+    function getPlayerById(playerId: string) {
+        return handState.players.find(players => players.id === playerId)
+    }
+
+    function getMinRaise(player: Player): number {
+        const currentBet = handState.currentBet
+        return currentBet + toCall.value
+    }
+
     // ---------------------------------------------------------------------------
     // API
     // ---------------------------------------------------------------------------
@@ -276,5 +289,8 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
         // game
         act,
+
+        //helper
+        getPlayerById
     }
 }
