@@ -115,7 +115,7 @@ const formatAction = (action: PlayerAction) => {
 
         <h1 class="text-2xl font-bold tracking-tight text-stone-900">Ajouter une main</h1>
 
-        <Tabs :default-value="currentTab" v-model="currentTab">
+        <Tabs :default-value="currentTab" v-model="currentTab" class="max-w-5xl mx-auto">
             <TabsList class="w-full">
                 <TabsTrigger value="setup">Setup</TabsTrigger>
                 <TabsTrigger value="preflop">Préflop</TabsTrigger>
@@ -138,7 +138,7 @@ const formatAction = (action: PlayerAction) => {
                     </div>
 
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid lg:grid-cols-2 gap-4">
                     <!-- Setup -->
                     <UiCard class="border-stone-200 shadow-sm">
                         <CardHeader>
@@ -203,52 +203,52 @@ const formatAction = (action: PlayerAction) => {
                         </CardHeader>
                         <CardContent class="space-y-3">
                             <p v-if="handState.errors.stacks" class="text-xs text-red-500">{{ handState.errors.stacks }}</p>
+
                             <div
                                 v-for="(player) in handState.players"
                                 :key="player.id"
-                                class="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center"
+                                class="flex gap-2 items-center"
                             >
-                            <!-- Name -->
-                            <input
-                                v-model="player.name"
-                                type="text"
-                                class="text-sm border border-stone-200 rounded-md px-3 py-1.5 text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                                :placeholder="player.id === 'hero' ? 'Hero' : 'Villain'"
-                            />
-                            <!-- Stack -->
-                            <div class="relative">
+                                <!-- Name -->
                                 <input
-                                    v-model.number="player.stack"
-                                    type="number"
-                                    min="0"
-                                    placeholder="100"
-                                    class="w-full text-sm border border-stone-200 rounded-md px-3 py-1.5 font-mono text-stone-700 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                    v-model="player.name"
+                                    type="text"
+                                    class="text-sm border border-stone-200 rounded-md px-3 py-1.5 text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                    :placeholder="player.id === 'hero' ? 'Hero' : 'Villain'"
                                 />
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">€</span>
-                            </div>
-                            <!-- Position -->
-                            <select
-                                v-model="player.position"
-                                class="text-xs border border-stone-200 rounded-md px-2 py-1.5 font-mono text-stone-600 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                            >
-                                <option value="">—</option>
-                                <option 
-                                    v-for="pos in POSITIONS" 
-                                    :key="pos" 
-                                    :value="pos"
-                                    :disabled="handState.players.some(p => p.position === pos && p.id !== player.id)"
-                                >{{ pos }}</option>
-                            </select>
-                            <!-- Remove (villains only) -->
-                            <button
-                                v-if="player.id !== 'hero'"
-                                type="button"
-                                class="text-stone-300 hover:text-red-400 transition-colors"
-                                @click="removePlayer(player)"
-                            >
-                                <Trash2 class="w-4 h-4" />
-                            </button>
-                            <div v-else class="w-4" />
+                                <!-- Stack -->  
+                                <div class="relative min-w-20">
+                                    <input
+                                        v-model.number="player.stack"
+                                        type="number"
+                                        min="0"
+                                        placeholder="100"
+                                        class="w-full text-sm border border-stone-200 rounded-md px-3 py-1.5 font-mono text-stone-700 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                    />
+                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">€</span>
+                                </div>
+                                <!-- Position -->
+                                <select
+                                    v-model="player.position"
+                                    class="text-xs border border-stone-200 rounded-md px-2 py-1.5 font-mono text-stone-600 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                >
+                                    <option value="">—</option>
+                                    <option 
+                                        v-for="pos in POSITIONS" 
+                                        :key="pos" 
+                                        :value="pos"
+                                        :disabled="handState.players.some(p => p.position === pos && p.id !== player.id)"
+                                    >{{ pos }}</option>
+                                </select>
+                                <!-- Remove (villains only) -->
+                                <button
+                                    v-if="player.id !== 'hero'"
+                                    type="button"
+                                    class="text-stone-300 hover:text-red-400 transition-colors"
+                                    @click="removePlayer(player)"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </button>
                             </div>
                         </CardContent>
                         <CardFooter class="mx-auto">
@@ -273,7 +273,7 @@ const formatAction = (action: PlayerAction) => {
                         <CardContent class="space-y-4">
 
                             <!-- 🧾 HISTORIQUE -->
-                            <div class="bg-stone-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+                            <div class="bg-stone-50 rounded-lg p-3 overflow-y-auto">
                                 <ul class="space-y-1 text-sm">
                                     <li 
                                         v-for="(action, index) in handState.actions['preflop']"
