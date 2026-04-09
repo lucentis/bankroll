@@ -381,6 +381,129 @@ const formatAction = (action: PlayerAction) => {
                     
                 </div>
             </TabsContent>
+
+            <TabsContent value="flop" class="py-4 space-y-4">
+                <div class="space-y-2">
+                    <UiCard class="border-stone-200 shadow-sm">
+                        <!-- HEADER -->
+                        <CardHeader>
+                            <CardTitle class="flex justify-between items-center">
+                            <span class="text-stone-500">Flop</span>
+                            <span class="font-mono text-lg">Pot: {{ totalPot }}€</span>
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent class="space-y-4">
+
+                            <!-- 🧾 HISTORIQUE -->
+                            <div class="bg-stone-50 rounded-lg p-3 overflow-y-auto">
+                                <ul class="space-y-1 text-sm">
+                                    <li 
+                                        v-for="(action, index) in handState.actions['flop']"
+                                        :key="action.playerId + action.type + index"
+                                        class="flex justify-between"
+                                    >
+                                        <span class="font-medium">
+                                            {{ getPlayerById(action.playerId)?.name }}
+                                        </span>
+                                        <span class="text-stone-500">
+                                            {{ formatAction(action) }}
+                                        </span>
+                                    </li>
+
+                                    <li v-if="handState.actions['flop'].length === 0" class="text-xs text-stone-400">
+                                    Aucune action pour le moment
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- 🎯 JOUEUR ACTUEL -->
+                            <div 
+                                class="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2 border border-primary/20"
+                                v-show="handState.street === 'flop'"
+                            >
+                                <div>
+                                    <p class="text-xs text-stone-400">À jouer</p>
+                                    <p class="font-semibold text-stone-800">
+                                    {{ currentPlayer?.name || '—' }}
+                                    </p>
+                                </div>
+
+                                <div class="text-right">
+                                    <p class="text-xs text-stone-400">À payer</p>
+                                    <p class="font-mono text-lg">
+                                    {{ toCall }}€
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 🎮 ACTIONS -->
+                            <div class="space-y-2" v-show="handState.street === 'flop'">
+                                <div class="flex flex-wrap gap-2">
+                                    <Button
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction.type === 'fold' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('fold')"
+                                        v-if="toCall !== 0"
+                                    >
+                                        <span>Fold</span>
+                                    </Button>
+
+                                    <Button
+                                        v-if="toCall === 0"
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction?.type === 'check' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('check')"
+                                    >
+                                        <span>Check</span>
+                                    </Button>
+
+                                    <Button
+                                        v-if="toCall > 0"
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction?.type === 'call' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('call')"
+                                    >
+                                        <span>Call</span>
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        class="text-xs px-3 py-1.5 rounded-full border font-mono font-medium transition-colors duration- hover:bg-slate-200"
+                                        :class="currentAction?.type === 'raise' && currentAction.playerId == currentPlayer?.id
+                                            ? 'bg-primary/70 text-primary-foreground border-primary/10'
+                                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'"
+                                        @click="setAction('raise')"
+                                    >
+                                        <span>Raise</span>
+                                    </Button>
+
+                                </div>
+
+                                <Input 
+                                    v-if="currentAction?.type == 'raise' && currentAction.playerId == currentPlayer?.id" 
+                                    type="number" 
+                                    @update:model-value="setAmount"
+                                    placeholder="Montant"
+                                />
+                                
+                                <Button @click="validateAction" class="w-full">Valider {{ formatAction(currentAction) }}</Button>
+                            </div>
+                        </CardContent>
+                    </UiCard>       
+                    
+                    
+                </div>
+            </TabsContent>
         </Tabs>
     </div>
     <pre>action: {{  currentAction }}</pre>
