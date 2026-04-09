@@ -37,6 +37,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
         pot: 0,
         currentBet: 0,
+        lastRaise: 0,
         contributions: {} as Record<string, number>,
         smallBlind: Number(blinds?.[0]) || 1,
         bigBlind: Number(blinds?.[1]) || 2,
@@ -131,22 +132,19 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         const bbPlayer = players.find(p => p.position === 'BB')
       
         if (sbPlayer) {
-            sbPlayer.stack -= handState.smallBlind
             handState.contributions[sbPlayer.id] = handState.smallBlind
-            handState.pot += handState.smallBlind
         } else {
             handState.pot += handState.smallBlind
         }
       
         if (bbPlayer) {
-            bbPlayer.stack -= handState.bigBlind
             handState.contributions[bbPlayer.id] = handState.bigBlind
-            handState.pot += handState.bigBlind
         } else {
             handState.pot += handState.bigBlind
         }
 
         handState.currentBet = handState.bigBlind
+        handState.lastRaise = handState.bigBlind
     }
 
 
@@ -182,13 +180,22 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         }
 
         if (action.type === 'raise') {
-            console.log(getMinRaise(currentPlayer.value))
-
             const raiseAmount = action.amount || 0
+
+            if (raiseAmount > player.stack) {
+                throw new Error(`Player: ${player.name} cannot raise more than its stack`);
+            }
+
+            if (raiseAmount !== player.stack && raiseAmount < getMinRaise()) {
+                throw new Error(`Player: ${player.name} raise must be at least the size of the previous raise`);
+            }
 
             handState.contributions[playerId] = raiseAmount
 
+            handState.lastRaise = raiseAmount - handState.currentBet
+
             handState.currentBet = raiseAmount
+
 
             const currentIndex = orderedPlayers.value.findIndex(p => p.id === playerId)
 
@@ -274,9 +281,8 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         return handState.players.find(players => players.id === playerId)
     }
 
-    function getMinRaise(player: Player): number {
-        const currentBet = handState.currentBet
-        return currentBet + toCall.value
+    function getMinRaise(): number {
+        return handState.currentBet + handState.lastRaise
     }
 
     // ---------------------------------------------------------------------------
@@ -288,7 +294,6 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         currentPlayer,
         toCall,
         availableActions,
-        streetPot,
         totalPot,
 
         // setup
@@ -299,6 +304,7 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
 
         // game
         act,
+        getMinRaise,
 
         //helper
         getPlayerById
