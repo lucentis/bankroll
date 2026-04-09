@@ -71,6 +71,14 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         )
     )
 
+    const streetPot = computed(() => {
+        return Object.values(handState.contributions).reduce((a, b) => a + b, 0)
+    })
+
+    const totalPot = computed(() => {
+        return handState.pot + streetPot.value
+    })
+
     // ---------------------------------------------------------------------------
     // SETUP
     // ---------------------------------------------------------------------------
@@ -168,23 +176,17 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         if (action.type === 'call') {
             const amountToCall = toCall.value
 
-            player.stack -= amountToCall
-            handState.pot += amountToCall
             handState.contributions[playerId] += amountToCall
 
             removeFromToAct(playerId)
         }
 
         if (action.type === 'raise') {
-
-            // if (!canRaise(player, action)) throw new Error(`Player ${player.name} ne peut pas raise ${action.amount}`)
             console.log(getMinRaise(currentPlayer.value))
 
             const raiseAmount = action.amount || 0
 
-            player.stack -= raiseAmount
-            handState.pot += raiseAmount
-            handState.contributions[playerId] += raiseAmount
+            handState.contributions[playerId] = raiseAmount
 
             handState.currentBet = raiseAmount
 
@@ -234,12 +236,18 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
     }
 
     function nextStreet() {
+        handState.players.forEach(player => {
+            player.stack -= handState.contributions[player.id]
+        })
+
+        handState.pot += streetPot.value
+
         if (handState.street === 'preflop') handState.street = 'flop'
         else if (handState.street === 'flop') handState.street = 'turn'
         else if (handState.street === 'turn') handState.street = 'river'
         else {
             handState.status = 'finished'
-        return
+            return
         }
 
         // reset street
@@ -280,6 +288,8 @@ export function useHandEngine(blinds: [number, number] = [1,2]) {
         currentPlayer,
         toCall,
         availableActions,
+        streetPot,
+        totalPot,
 
         // setup
         addPlayer,

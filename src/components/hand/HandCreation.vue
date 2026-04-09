@@ -20,7 +20,7 @@ const POSITIONS: Position[] = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'BTN', 'SB', 'B
 const session = bankrollStore.sessions.find(s => s.id === bankrollStore.activeSessionId)
 const blinds = session?.stakes?.split('/').map(blind => Number(blind)) as [number, number] || [1,2]
 
-const { handState, currentPlayer, toCall, addPlayer, removePlayer, startHand, act, getPlayerById } = useHandEngine(blinds)
+const { handState, currentPlayer, toCall, addPlayer, removePlayer, startHand, act, getPlayerById, totalPot } = useHandEngine(blinds)
 
 const currentAction = reactive<PlayerAction>({ 
     playerId: '',
@@ -41,6 +41,8 @@ const setAction = (action: Action) => {
     if (!currentPlayer.value) return
     currentAction.type = action
     currentAction.playerId = currentPlayer.value.id
+
+    if (action == 'call') currentAction.amount = handState.currentBet
 }
 
 const setAmount = (amount: number | string) => {
@@ -93,7 +95,7 @@ const usedCards = computed<Card[]>(() => {
 const formatAction = (action: PlayerAction) => {
     if (action.type === 'fold') return 'Fold'
     if (action.type === 'check') return 'Check'
-    if (action.type === 'call') return `Call ${handState.currentBet}€`
+    if (action.type === 'call') return `Call ${action.amount}€`
     if (action.type === 'raise') return action.amount ? `Raise to ${action.amount}€` : 'Raise'
     return action.type
 }
@@ -264,7 +266,7 @@ const formatAction = (action: PlayerAction) => {
                         <CardHeader>
                             <CardTitle class="flex justify-between items-center">
                             <span class="text-stone-500">Préflop</span>
-                            <span class="font-mono text-lg">Pot: {{ handState.pot }}€</span>
+                            <span class="font-mono text-lg">Pot: {{ totalPot }}€</span>
                             </CardTitle>
                         </CardHeader>
 
